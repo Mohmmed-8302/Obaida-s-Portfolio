@@ -323,7 +323,8 @@ function StorySection() {
     { year: "2026", title: "The Breakthrough", desc: "Content went viral. Portfolio design services launched. No looking back." },
   ];
   return (
-    <Section bg="var(--color-storm)">
+    <section style={{ background: "var(--color-storm)" }}>
+      <div style={{ padding: "52px 28px" }}>
       <SectionHead label="Timeline" title="Obaida's Story" />
       <div className="relative" style={{ paddingLeft: 34 }}>
         <div className="absolute" style={{ left: 14, top: 6, bottom: 6, width: 2, background: "var(--color-dusty-rose)" }} />
@@ -341,7 +342,8 @@ function StorySection() {
           </Reveal>
         ))}
       </div>
-    </Section>
+      </div>
+    </section>
   );
 }
 
