@@ -64,9 +64,9 @@ export default function XPTaskbar({ browserOpen, browserMinimized, onStartClick,
           <button
             className="flex items-center justify-center gap-2 px-4"
             style={{
-              height: 30,
-              minWidth: 160,
-              maxWidth: 220,
+              height: 26,
+              minWidth: 130,
+              maxWidth: 180,
               background: browserMinimized
                 ? "rgba(255,255,255,0.1)"
                 : "linear-gradient(to bottom, rgba(255,255,255,0.25), rgba(255,255,255,0.1))",
