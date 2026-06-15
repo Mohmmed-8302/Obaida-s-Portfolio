@@ -9,6 +9,14 @@ interface BrowserWindowProps {
   onMinimize: () => void;
 }
 
+type ResizeDir =
+  | "n" | "s" | "e" | "w"
+  | "ne" | "nw" | "se" | "sw"
+  | null;
+
+const MIN_W = 320;
+const MIN_H = 250;
+
 export default function BrowserWindow({ onClose, onMinimize }: BrowserWindowProps) {
   const [maximized, setMaximized] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -16,8 +24,9 @@ export default function BrowserWindow({ onClose, onMinimize }: BrowserWindowProp
   const [pos, setPos] = useState({ x: 60, y: 30 });
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [dragging, setDragging] = useState(false);
-  const [resizing, setResizing] = useState(false);
+  const [resizeDir, setResizeDir] = useState<ResizeDir>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+  const resizeStart = useRef({ x: 0, y: 0, px: 0, py: 0, w: 0, h: 0 });
   const prevRect = useRef({ x: 60, y: 30, w: 0, h: 0 });
 
   useEffect(() => {
@@ -54,19 +63,43 @@ export default function BrowserWindow({ onClose, onMinimize }: BrowserWindowProp
     return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
   }, [dragging]);
 
+  const startResize = useCallback((dir: ResizeDir, e: React.MouseEvent) => {
+    if (maximized) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setResizeDir(dir);
+    resizeStart.current = { x: e.clientX, y: e.clientY, px: pos.x, py: pos.y, w: size.w, h: size.h };
+  }, [maximized, pos, size]);
+
   useEffect(() => {
-    if (!resizing) return;
+    if (!resizeDir) return;
+    const s = resizeStart.current;
     const onMove = (e: MouseEvent) => {
-      setSize(s => ({
-        w: Math.max(400, e.clientX - pos.x),
-        h: Math.max(300, e.clientY - pos.y),
-      }));
+      const dx = e.clientX - s.x;
+      const dy = e.clientY - s.y;
+      let newX = s.px, newY = s.py, newW = s.w, newH = s.h;
+
+      if (resizeDir.includes("e")) newW = Math.max(MIN_W, s.w + dx);
+      if (resizeDir.includes("s")) newH = Math.max(MIN_H, s.h + dy);
+      if (resizeDir.includes("w")) {
+        const proposedW = s.w - dx;
+        if (proposedW >= MIN_W) { newW = proposedW; newX = s.px + dx; }
+        else { newW = MIN_W; newX = s.px + (s.w - MIN_W); }
+      }
+      if (resizeDir.includes("n")) {
+        const proposedH = s.h - dy;
+        if (proposedH >= MIN_H) { newH = proposedH; newY = Math.max(0, s.py + dy); }
+        else { newH = MIN_H; newY = s.py + (s.h - MIN_H); }
+      }
+
+      setPos({ x: newX, y: newY });
+      setSize({ w: newW, h: newH });
     };
-    const onUp = () => setResizing(false);
+    const onUp = () => setResizeDir(null);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
     return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
-  }, [resizing, pos]);
+  }, [resizeDir]);
 
   const toggleMaximize = useCallback(() => {
     if (maximized) {
@@ -85,6 +118,13 @@ export default function BrowserWindow({ onClose, onMinimize }: BrowserWindowProp
     top: pos.y,
     width: size.w,
     height: size.h,
+  };
+
+  const EDGE = 6;
+
+  const cursorMap: Record<string, string> = {
+    n: "ns-resize", s: "ns-resize", e: "ew-resize", w: "ew-resize",
+    ne: "nesw-resize", sw: "nesw-resize", nw: "nwse-resize", se: "nwse-resize",
   };
 
   return (
@@ -170,18 +210,30 @@ export default function BrowserWindow({ onClose, onMinimize }: BrowserWindowProp
         height: 22, background: "#ece9d8", borderTop: "1px solid #aaa", fontSize: 11, color: "#444",
       }}>
         <span>{loaded ? "Done" : "Loading..."}</span>
+        <span className="ml-auto" style={{ fontSize: 10, color: "#888" }}>
+          {Math.round(size.w)} × {Math.round(size.h - 84)}
+        </span>
       </div>
 
-      {/* Resize handle */}
+      {/* Resize handles — all edges and corners */}
       {!maximized && (
-        <div
-          className="absolute"
-          style={{
-            bottom: 0, right: 0, width: 16, height: 16,
-            cursor: "nwse-resize",
-          }}
-          onMouseDown={(e) => { e.preventDefault(); setResizing(true); }}
-        />
+        <>
+          {(["n","s","e","w","ne","nw","se","sw"] as const).map(dir => {
+            const isCorner = dir.length === 2;
+            const style: React.CSSProperties = { position: "absolute", zIndex: 100, cursor: cursorMap[dir] };
+
+            if (dir === "n") { style.top = -EDGE/2; style.left = EDGE; style.right = EDGE; style.height = EDGE; }
+            else if (dir === "s") { style.bottom = -EDGE/2; style.left = EDGE; style.right = EDGE; style.height = EDGE; }
+            else if (dir === "e") { style.right = -EDGE/2; style.top = EDGE; style.bottom = EDGE; style.width = EDGE; }
+            else if (dir === "w") { style.left = -EDGE/2; style.top = EDGE; style.bottom = EDGE; style.width = EDGE; }
+            else if (dir === "nw") { style.top = -EDGE/2; style.left = -EDGE/2; style.width = EDGE*2; style.height = EDGE*2; }
+            else if (dir === "ne") { style.top = -EDGE/2; style.right = -EDGE/2; style.width = EDGE*2; style.height = EDGE*2; }
+            else if (dir === "sw") { style.bottom = -EDGE/2; style.left = -EDGE/2; style.width = EDGE*2; style.height = EDGE*2; }
+            else if (dir === "se") { style.bottom = -EDGE/2; style.right = -EDGE/2; style.width = EDGE*2; style.height = EDGE*2; }
+
+            return <div key={dir} style={style} onMouseDown={e => startResize(dir, e)} />;
+          })}
+        </>
       )}
     </motion.div>
   );

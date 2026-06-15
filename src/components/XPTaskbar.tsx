@@ -37,7 +37,7 @@ export default function XPTaskbar({ browserOpen, browserMinimized, onStartClick,
           background: startOpen
             ? "linear-gradient(to bottom, #1a8a1a, #0e6e0e)"
             : "linear-gradient(to bottom, #3caa3c, #2d8a2d, #1a6a1a)",
-          borderRadius: "0 8px 8px 0",
+          borderRadius: "0 10px 10px 0",
           border: "none",
           color: "#fff",
           fontWeight: 700,
@@ -45,6 +45,7 @@ export default function XPTaskbar({ browserOpen, browserMinimized, onStartClick,
           letterSpacing: "0.02em",
           cursor: "pointer",
           minWidth: 100,
+          marginLeft: 4,
           textShadow: "1px 1px 1px rgba(0,0,0,0.4)",
           boxShadow: startOpen
             ? "inset 0 1px 4px rgba(0,0,0,0.3)"
@@ -83,11 +84,13 @@ export default function XPTaskbar({ browserOpen, browserMinimized, onStartClick,
       </div>
 
       {/* System tray */}
-      <div className="flex items-center gap-3 h-full px-3" style={{
+      <div className="flex items-center justify-center h-full" style={{
         background: "linear-gradient(to bottom, #0F6DE8, #0854CC)",
         borderLeft: "1px solid #5B9BF5",
+        minWidth: 90,
+        padding: "0 16px",
       }}>
-        <span style={{ fontSize: 11, color: "#fff" }}>{time}</span>
+        <span style={{ fontSize: 12, color: "#fff", textAlign: "center", whiteSpace: "nowrap" }}>{time}</span>
       </div>
     </div>
   );

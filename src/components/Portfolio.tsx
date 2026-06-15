@@ -4,7 +4,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 export default function Portfolio() {
   return (
-    <div style={{ background: "var(--color-blue-slate)", color: "var(--color-blush-white)", fontFamily: "var(--font-mono)", fontSize: 14, lineHeight: 1.5 }}>
+    <div className="portfolio-root" style={{
+      background: "var(--color-blue-slate)", color: "var(--color-blush-white)",
+      fontFamily: "var(--font-mono)", fontSize: 14, lineHeight: 1.5,
+      containerType: "inline-size",
+    }}>
       <HeroSection />
       <AboutSection />
       <StorySection />
@@ -21,7 +25,7 @@ export default function Portfolio() {
 function Section({ bg, children, id }: { bg: string; children: React.ReactNode; id?: string }) {
   return (
     <section id={id} style={{ background: bg }}>
-      <div className="mx-auto" style={{ maxWidth: 640, padding: "52px 28px" }}>
+      <div className="section-inner" style={{ maxWidth: 640, margin: "0 auto", padding: "52px 28px" }}>
         {children}
       </div>
     </section>
@@ -31,7 +35,7 @@ function Section({ bg, children, id }: { bg: string; children: React.ReactNode; 
 function SectionHead({ label, title, dark = false }: { label: string; title: string; dark?: boolean }) {
   return (
     <div style={{ marginBottom: 28 }}>
-      <div className="font-bold uppercase" style={{ fontSize: 11, letterSpacing: "0.18em", color: "var(--color-dusty-rose)", marginBottom: 8 }}>
+      <div className="font-bold uppercase section-label" style={{ fontSize: 11, letterSpacing: "0.18em", color: "var(--color-dusty-rose)", marginBottom: 8 }}>
         {label}
       </div>
       <TypingTitle text={title} dark={dark} />
@@ -50,7 +54,6 @@ function useReveal() {
     const reveal = () => setVisible(true);
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { reveal(); obs.disconnect(); } }, { threshold: 0.12 });
     obs.observe(el);
-    // Fallbacks: if already near the viewport (e.g. inside a scroll container), reveal anyway.
     const fb = setTimeout(() => {
       const r = el.getBoundingClientRect();
       if (r.top < (window.innerHeight || 800) + 120) reveal();
@@ -93,7 +96,7 @@ function TypingTitle({ text, dark = false }: { text: string; dark?: boolean }) {
   }, [visible, text]);
 
   return (
-    <div ref={ref} style={{
+    <div ref={ref} className="section-title" style={{
       fontFamily: "var(--font-display)", fontSize: 34, lineHeight: 1.15, minHeight: "1.2em",
       color: dark ? "var(--color-blue-slate)" : "var(--color-blush-white)",
     }}>
@@ -130,7 +133,7 @@ function RetroCard({ title, children, dark = true, className = "" }: { title: st
         </div>
       </div>
       {!minimized && (
-        <div style={{ padding: 18, flex: 1, color: dark ? "var(--color-blush-white)" : "var(--color-storm)" }}>
+        <div className="card-body" style={{ padding: 18, flex: 1, color: dark ? "var(--color-blush-white)" : "var(--color-storm)" }}>
           {children}
         </div>
       )}
@@ -140,7 +143,7 @@ function RetroCard({ title, children, dark = true, className = "" }: { title: st
 
 function Badge({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{
+    <span className="badge-item" style={{
       fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em",
       padding: "4px 10px", color: "var(--color-dusty-rose)",
       border: "1px solid var(--color-dusty-rose)", boxShadow: "2px 2px 0 var(--color-blue-slate)",
@@ -190,8 +193,8 @@ function ProgressBar({ label, value }: { label: string; value: number }) {
     return () => clearInterval(id);
   }, [visible, value]);
   return (
-    <div ref={ref} className="flex items-center" style={{ gap: 12 }}>
-      <span className="font-bold uppercase" style={{ fontSize: 11, letterSpacing: "0.05em", minWidth: 110, whiteSpace: "nowrap" }}>{label}</span>
+    <div ref={ref} className="progress-row" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <span className="font-bold uppercase progress-label" style={{ fontSize: 11, letterSpacing: "0.05em", minWidth: 110, whiteSpace: "nowrap" }}>{label}</span>
       <div className="flex-1 relative overflow-hidden" style={{ height: 20, background: "var(--color-blue-slate)", border: "2px solid var(--color-storm-light)" }}>
         <div className="h-full flex items-center justify-end" style={{
           width: `${cur}%`, paddingRight: 6, background: "var(--color-dusty-rose)",
@@ -242,12 +245,13 @@ function HeroSection() {
       }
     };
     animId = requestAnimationFrame(draw);
-    window.addEventListener("resize", resize);
-    return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas.parentElement);
+    return () => { cancelAnimationFrame(animId); ro.disconnect(); };
   }, []);
 
   return (
-    <section className="relative overflow-hidden flex flex-col items-center justify-center text-center"
+    <section className="hero-section relative overflow-hidden flex flex-col items-center justify-center text-center"
       style={{ background: "linear-gradient(180deg, #1C2028 0%, #111318 100%)", padding: "64px 28px 72px" }}>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.5) 100%)" }} />
@@ -260,16 +264,16 @@ function HeroSection() {
             borderRadius: 12,
           }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/logo-glow.png" alt="Obaida" style={{ width: 168, height: "auto", display: "block", animation: "logoGlow 3s ease-in-out infinite", imageRendering: "auto" }} />
+            <img className="hero-logo" src="/assets/logo-glow.png" alt="Obaida" style={{ width: 168, height: "auto", display: "block", animation: "logoGlow 3s ease-in-out infinite", imageRendering: "auto" }} />
           </div>
         </Reveal>
         <Reveal delay={150}>
-          <div className="font-bold uppercase" style={{ fontSize: 11, letterSpacing: "0.22em", color: "var(--color-dusty-rose)", marginBottom: 18 }}>
+          <div className="font-bold uppercase hero-subtitle" style={{ fontSize: 11, letterSpacing: "0.22em", color: "var(--color-dusty-rose)", marginBottom: 18 }}>
             Video Editing / Portfolio Design
           </div>
         </Reveal>
         <Reveal delay={300}>
-          <div className="flex flex-wrap justify-center" style={{ gap: 10, marginBottom: 30, maxWidth: 420 }}>
+          <div className="badge-row flex flex-wrap justify-center" style={{ gap: 10, marginBottom: 30, maxWidth: 420 }}>
             <Badge>Awareness Content</Badge>
             <Badge>Gaming Content</Badge>
             <Badge>Education Content</Badge>
@@ -296,13 +300,13 @@ function AboutSection() {
         </RetroCard>
       </Reveal>
       <Reveal delay={300}>
-        <div className="grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginTop: 18 }}>
+        <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginTop: 18 }}>
           {stats.map(([val, lab]) => (
-            <div key={lab} style={{
+            <div key={lab} className="stat-card" style={{
               border: "2px solid var(--color-blue-slate)", boxShadow: "3px 3px 0 var(--color-blue-slate)",
               background: "var(--color-storm)", padding: "16px 12px", textAlign: "center",
             }}>
-              <div style={{ fontSize: 26, fontWeight: 700, color: "var(--color-dusty-rose)" }}>{val}</div>
+              <div className="stat-value" style={{ fontSize: 26, fontWeight: 700, color: "var(--color-dusty-rose)" }}>{val}</div>
               <div className="uppercase" style={{ fontSize: 10, letterSpacing: "0.06em", marginTop: 4, color: "var(--color-storm-lighter)" }}>{lab}</div>
             </div>
           ))}
@@ -330,8 +334,8 @@ function StorySection() {
                 left: -27, top: 5, width: 12, height: 12, background: "var(--color-dusty-rose)",
                 border: "2px solid var(--color-blush-white)", boxShadow: "0 0 8px rgba(201,122,138,0.5)",
               }} />
-              <div style={{ fontSize: 22, fontWeight: 700, color: "var(--color-dusty-rose)" }}>{e.year}</div>
-              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 2 }}>{e.title}</div>
+              <div className="timeline-year" style={{ fontSize: 22, fontWeight: 700, color: "var(--color-dusty-rose)" }}>{e.year}</div>
+              <div className="timeline-title" style={{ fontSize: 16, fontWeight: 700, marginTop: 2 }}>{e.title}</div>
               <div style={{ fontSize: 13, marginTop: 4, lineHeight: 1.6, color: "var(--color-storm-lighter)" }}>{e.desc}</div>
             </div>
           </Reveal>
@@ -352,7 +356,7 @@ function SkillsSection() {
   return (
     <Section bg="var(--color-blush-white)">
       <SectionHead label="Skills" title="Experience & Skills" dark />
-      <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 18 }}>
+      <div className="two-col-grid">
         <Reveal delay={150}>
           <RetroCard title="editing_skills.reel" className="h-full">
             <div className="flex flex-col" style={{ gap: 14 }}>
@@ -389,7 +393,7 @@ function PortfolioSection() {
   return (
     <Section bg="var(--color-storm)" id="showreel">
       <SectionHead label="Showreel" title="Projects & Portfolio" />
-      <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: 16 }}>
+      <div className="projects-grid">
         {projects.map((p, i) => (
           <Reveal key={p.num} delay={i * 120}>
             <RetroCard title={`project_${p.num}.mp4`} className="h-full">
@@ -424,7 +428,7 @@ function ContactSection() {
           Ready to take your content to the next level? Let&apos;s create something worth watching.
         </p>
       </Reveal>
-      <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 18 }}>
+      <div className="two-col-grid">
         <Reveal delay={200}>
           <RetroCard title="contact_info.mov" className="h-full">
             <div className="flex flex-col" style={{ gap: 16 }}>
@@ -479,13 +483,13 @@ function InputField({ label, placeholder, type = "text", multiline = false }: { 
 function FooterSection() {
   return (
     <footer style={{ background: "var(--color-storm)", borderTop: "2px solid var(--color-storm-light)", padding: "20px 28px" }}>
-      <div className="mx-auto" style={{ maxWidth: 640 }}>
+      <div style={{ maxWidth: 640, margin: "0 auto" }}>
         <div className="flex overflow-hidden" style={{ gap: 4, marginBottom: 16 }}>
           {Array.from({ length: 40 }).map((_, i) => (
             <div key={i} className="shrink-0" style={{ width: 16, height: 10, opacity: 0.2, border: "2px solid var(--color-dusty-rose)" }} />
           ))}
         </div>
-        <div className="flex justify-between items-center uppercase" style={{ fontSize: 11, letterSpacing: "0.06em", color: "var(--color-storm-lighter)" }}>
+        <div className="footer-bottom flex justify-between items-center uppercase" style={{ fontSize: 11, letterSpacing: "0.06em", color: "var(--color-storm-lighter)" }}>
           <span>Obaida — Video / Design</span>
           <span>2024–2026</span>
         </div>
