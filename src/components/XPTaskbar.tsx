@@ -45,7 +45,6 @@ export default function XPTaskbar({ browserOpen, browserMinimized, onStartClick,
           letterSpacing: "0.02em",
           cursor: "pointer",
           minWidth: 100,
-          marginLeft: 4,
           textShadow: "1px 1px 1px rgba(0,0,0,0.4)",
           boxShadow: startOpen
             ? "inset 0 1px 4px rgba(0,0,0,0.3)"
