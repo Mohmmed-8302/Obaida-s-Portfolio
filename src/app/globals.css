@@ -97,6 +97,17 @@ body {
 }
 @keyframes recBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
+@keyframes crtFlicker {
+  0%, 40%, 44%, 60%, 64%, 100% { opacity: 1; }
+  41%, 61% { opacity: 0.91; }
+  42%, 62% { opacity: 1; }
+  43%, 63% { opacity: 0.96; }
+}
+@keyframes crtScanMove {
+  0%   { top: -20%; }
+  100% { top: 120%; }
+}
+
 /* ─── Portfolio responsive container queries ─── */
 
 .portfolio-root .section-inner { max-width: 100%; }

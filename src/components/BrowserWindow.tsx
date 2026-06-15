@@ -205,6 +205,29 @@ export default function BrowserWindow({ onClose, onMinimize }: BrowserWindowProp
         )}
       </div>
 
+      {/* CRT effect overlay */}
+      {loaded && (
+        <div className="absolute pointer-events-none overflow-hidden" style={{
+          top: 62, left: 0, right: 0, bottom: 22, zIndex: 60,
+        }}>
+          {/* Scanlines */}
+          <div className="absolute inset-0" style={{
+            backgroundImage: "repeating-linear-gradient(180deg, transparent 0px, transparent 2px, rgba(0,0,0,0.13) 2px, rgba(0,0,0,0.13) 4px)",
+            animation: "crtFlicker 9s step-end infinite",
+          }} />
+          {/* Vignette */}
+          <div className="absolute inset-0" style={{
+            background: "radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,0.55) 100%)",
+          }} />
+          {/* Moving bright scan band */}
+          <div className="absolute left-0 right-0" style={{
+            height: "20%",
+            background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.025) 50%, transparent)",
+            animation: "crtScanMove 10s linear infinite",
+          }} />
+        </div>
+      )}
+
       {/* Status bar */}
       <div className="shrink-0 flex items-center px-3" style={{
         height: 22, background: "#ece9d8", borderTop: "1px solid #aaa", fontSize: 11, color: "#444",
