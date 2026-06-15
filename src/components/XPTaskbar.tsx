@@ -64,7 +64,7 @@ export default function XPTaskbar({ browserOpen, browserMinimized, onStartClick,
           <button
             className="flex items-center justify-center gap-2 px-4"
             style={{
-              height: 26,
+              alignSelf: "stretch",
               minWidth: 100,
               maxWidth: 130,
               background: browserMinimized
