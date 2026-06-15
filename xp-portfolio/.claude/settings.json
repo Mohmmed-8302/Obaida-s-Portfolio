@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "Set-Location 'C:\\MY WORK\\my site\\The Portfolio\\xp-portfolio'; $s = git status --porcelain 2>$null; if ($s) { $d = Get-Date -Format 'yyyy-MM-dd HH:mm'; git add -A; git commit -m \"Auto-deploy: $d\"; git push origin main; vercel --prod --yes }",
+            "shell": "powershell",
+            "timeout": 180,
+            "statusMessage": "Pushing to GitHub and deploying to Vercel..."
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(vercel *)",
+      "Bash(npx vercel *)"
+    ]
+  }
+}

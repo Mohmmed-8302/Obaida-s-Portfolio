@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Courier New Custom';
+  src: url('/assets/fonts/CourierNew-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Courier New Custom';
+  src: url('/assets/fonts/CourierNew-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cambria Custom';
+  src: url('/assets/fonts/Cambria-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@theme inline {
+  --color-blush-white: #F7F3F2;
+  --color-dusty-rose: #C97A8A;
+  --color-blue-slate: #111318;
+  --color-storm: #1C2028;
+  --color-rose-light: #D9A0AC;
+  --color-rose-dark: #A8596A;
+  --color-rose-darker: #8A3E51;
+  --color-storm-light: #2A2F3A;
+  --color-storm-lighter: #3A404D;
+  --font-mono: 'Courier New Custom', 'Courier New', monospace;
+  --font-display: 'Cambria Custom', 'Cambria', Georgia, serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  background: #0a0a0a;
+  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  cursor: default;
+  user-select: none;
+}
+
+::selection { background: var(--color-dusty-rose); color: white; }
+
+/* XP scrollbar */
+::-webkit-scrollbar { width: 16px; }
+::-webkit-scrollbar-track { background: #ece9d8; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right, #bbb8a8, #d6d2c2, #bbb8a8);
+  border: 1px solid #9a978a;
+  border-radius: 0;
+}
+::-webkit-scrollbar-button { display: block; height: 16px; background: #ece9d8; border: 1px solid #9a978a; }
+
+/* Animations */
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes scanMove { 0% { top: 0; } 100% { top: 100%; } }
+@keyframes crtOn {
+  0% { transform: scaleY(0.01) scaleX(0.5); filter: brightness(10); }
+  30% { transform: scaleY(0.01) scaleX(1); filter: brightness(5); }
+  50% { transform: scaleY(1) scaleX(1); filter: brightness(2); }
+  100% { transform: scaleY(1) scaleX(1); filter: brightness(1); }
+}
+@keyframes crtOff {
+  0% { transform: scaleY(1) scaleX(1); filter: brightness(1); }
+  40% { transform: scaleY(0.01) scaleX(1); filter: brightness(5); }
+  70% { transform: scaleY(0.01) scaleX(0.3); filter: brightness(10); }
+  100% { transform: scaleY(0) scaleX(0); filter: brightness(0); }
+}
+@keyframes xpLoad {
+  0% { width: 0; }
+  100% { width: 100%; }
+}
+@keyframes progressBlock {
+  0% { left: -30%; }
+  100% { left: 100%; }
+}
+@keyframes logoGlow {
+  0%, 100% { filter: drop-shadow(0 0 16px rgba(201,122,138,0.4)); }
+  50% { filter: drop-shadow(0 0 28px rgba(201,122,138,0.7)); }
+}
+@keyframes glitchShake {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, -1px); }
+  80% { transform: translate(1px, 1px); }
+}
+@keyframes progressPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(201,122,138,0.3); }
+  50% { box-shadow: 0 0 14px rgba(201,122,138,0.6); }
+}
+@keyframes recBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
