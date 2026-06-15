@@ -32,7 +32,7 @@ export default function XPTaskbar({ browserOpen, browserMinimized, onStartClick,
     }}>
       {/* Start button */}
       <button
-        className="flex items-center gap-1 h-full px-3 relative"
+        className="flex items-center justify-center gap-2 h-full px-3 relative"
         style={{
           background: startOpen
             ? "linear-gradient(to bottom, #1a8a1a, #0e6e0e)"
