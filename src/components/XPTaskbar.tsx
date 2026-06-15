@@ -62,21 +62,24 @@ export default function XPTaskbar({ browserOpen, browserMinimized, onStartClick,
       <div className="flex items-center gap-1 flex-1 px-2 h-full overflow-hidden">
         {browserOpen && (
           <button
-            className="flex items-center gap-2 h-7 px-3 max-w-[200px]"
+            className="flex items-center justify-center gap-2 px-4"
             style={{
+              height: 30,
+              minWidth: 160,
+              maxWidth: 220,
               background: browserMinimized
                 ? "rgba(255,255,255,0.1)"
                 : "linear-gradient(to bottom, rgba(255,255,255,0.25), rgba(255,255,255,0.1))",
               border: "1px solid rgba(255,255,255,0.2)",
               borderRadius: 3,
               color: "#fff",
-              fontSize: 11,
+              fontSize: 12,
               cursor: "pointer",
               boxShadow: browserMinimized ? "none" : "inset 0 0 4px rgba(255,255,255,0.1)",
             }}
             onClick={onBrowserClick}
           >
-            <span style={{ fontSize: 12 }}>🌐</span>
+            <span style={{ fontSize: 13 }}>🌐</span>
             <span className="truncate">Obaida Portfolio</span>
           </button>
         )}
