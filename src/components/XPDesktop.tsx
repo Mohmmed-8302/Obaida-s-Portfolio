@@ -227,14 +227,21 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
   // Drag move/up handlers (attached to window during drag)
   useEffect(() => {
     if (!dragging) return;
+    const maxX = window.innerWidth - GRID_W;
+    const maxY = window.innerHeight - TASKBAR_HEIGHT - GRID_H;
     const onMove = (e: MouseEvent) => {
-      setDragging((d) => d ? { ...d, currentX: e.clientX - d.offsetX, currentY: e.clientY - d.offsetY } : null);
+      setDragging((d) => {
+        if (!d) return null;
+        const x = Math.max(0, Math.min(e.clientX - d.offsetX, maxX));
+        const y = Math.max(0, Math.min(e.clientY - d.offsetY, maxY));
+        return { ...d, currentX: x, currentY: y };
+      });
     };
     const onUp = (e: MouseEvent) => {
-      const rawX = e.clientX - dragging.offsetX;
-      const rawY = e.clientY - dragging.offsetY;
-      const maxY = window.innerHeight - TASKBAR_HEIGHT - GRID_H;
-      const snapped = snapToGrid(rawX, Math.min(rawY, maxY));
+      const rawX = Math.max(0, Math.min(e.clientX - dragging.offsetX, maxX));
+      const rawY = Math.max(0, Math.min(e.clientY - dragging.offsetY, maxY));
+      const snapped = snapToGrid(rawX, rawY);
+      snapped.y = Math.min(snapped.y, maxY);
       setIconPositions((prev) => ({ ...prev, [dragging.id]: snapped }));
       setDragging(null);
     };
