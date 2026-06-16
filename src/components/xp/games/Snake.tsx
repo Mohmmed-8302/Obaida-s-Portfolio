@@ -16,6 +16,7 @@ export default function Snake() {
   const [state, setState] = useState<"ready" | "playing" | "over" | "paused">("ready");
   const [focused, setFocused] = useState(false);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const snake = useRef<Pt[]>([{ x: 10, y: 10 }]);
   const dir = useRef<Pt>({ x: 1, y: 0 });
   const nextDir = useRef<Pt>({ x: 1, y: 0 });
@@ -40,6 +41,7 @@ export default function Snake() {
     placeFood();
     setScore(0);
     setState("playing");
+    setTimeout(() => containerRef.current?.focus(), 0);
   }, [placeFood]);
 
   const draw = useCallback(() => {
@@ -111,8 +113,10 @@ export default function Snake() {
 
   return (
     <div
+      ref={containerRef}
       tabIndex={0}
       onKeyDown={onKey}
+      onMouseDown={() => containerRef.current?.focus()}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
       className="absolute inset-0 flex flex-col items-center justify-center outline-none"
