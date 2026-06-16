@@ -37,20 +37,21 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
     >
       <div style={{ border: "1px solid #0831a8", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "4px 4px 18px rgba(0,0,0,0.5)" }}>
         {/* Header */}
-        <div className="flex items-center gap-2.5 px-3" style={{ height: 58, background: "linear-gradient(to bottom,#1f60db 0%,#3f8af0 45%,#2870e6 55%,#13409e 100%)", borderBottom: "2px solid #f5b840" }}>
-          <div style={{ width: 38, height: 38, borderRadius: 5, overflow: "hidden", border: "2px solid rgba(255,255,255,0.7)", background: "linear-gradient(135deg,#c97a8a,#8a3e51)", display: "flex", alignItems: "flex-end", justifyContent: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
-            <svg width="34" height="30" viewBox="0 0 34 30"><circle cx="17" cy="11" r="7" fill="#fff" opacity="0.95" /><path d="M3 30 c0-9 7-13 14-13 s14 4 14 13z" fill="#fff" opacity="0.95" /></svg>
+        <div className="flex items-center gap-3 px-3" style={{ height: 68, background: "linear-gradient(to bottom,#1f60db 0%,#3f8af0 45%,#2870e6 55%,#13409e 100%)", borderBottom: "2px solid #f5b840" }}>
+          <div style={{ width: 48, height: 48, borderRadius: 6, overflow: "hidden", border: "3px solid rgba(255,255,255,0.85)", background: "linear-gradient(135deg,#c97a8a,#8a3e51)", display: "flex", alignItems: "flex-end", justifyContent: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
+            <svg width="40" height="35" viewBox="0 0 34 30"><circle cx="17" cy="11" r="7" fill="#fff" opacity="0.95" /><path d="M3 30 c0-9 7-13 14-13 s14 4 14 13z" fill="#fff" opacity="0.95" /></svg>
           </div>
-          <span style={{ color: "#fff", fontWeight: 700, fontSize: 15, textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}>Obaida</span>
+          <span style={{ color: "#fff", fontWeight: 700, fontSize: 19, textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}>Obaida</span>
         </div>
 
         {/* Two panes */}
         <div className="flex" style={{ background: "#fff" }}>
           {/* Left pane */}
-          <div className="relative" style={{ width: 196, background: "#fff", padding: "6px 0" }}>
-            {PINNED.map((id) => <MenuRow key={id} icon={APPS[id].icon(26)} label={shortTitle(id)} onClick={() => open(id)} bold />)}
+          <div className="relative" style={{ width: 196, background: "#fff", padding: "6px 0", display: "flex", flexDirection: "column" }}>
+            {PINNED.map((id) => <MenuRow key={id} icon={APPS[id].icon(26)} label={shortTitle(id)} onClick={() => open(id)} bold arrow />)}
             <Divider />
-            {FREQUENT.map((id) => <MenuRow key={id} icon={APPS[id].icon(26)} label={shortTitle(id)} small onClick={() => open(id)} />)}
+            {FREQUENT.map((id) => <MenuRow key={id} icon={APPS[id].icon(26)} label={shortTitle(id)} small onClick={() => open(id)} arrow />)}
+            <div style={{ flex: 1 }} />
             <Divider />
             {/* All Programs */}
             <button
@@ -60,7 +61,7 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
               onClick={() => setShowAll((v) => !v)}
             >
               <span style={{ color: showAll ? "#fff" : "#13409e" }}>All Programs</span>
-              <span style={{ marginLeft: "auto", color: showAll ? "#fff" : "#13409e" }}>▸</span>
+              <span style={{ marginLeft: "auto" }}><GreenArrow /></span>
             </button>
 
             {/* All Programs flyout */}
@@ -106,7 +107,7 @@ function shortTitle(id: AppId): string {
   return map[id] ?? APPS[id].title;
 }
 
-function MenuRow({ icon, label, onClick, bold, small, right, disabled }: { icon: ReactNode; label: string; onClick: () => void; bold?: boolean; small?: boolean; right?: boolean; disabled?: boolean }) {
+function MenuRow({ icon, label, onClick, bold, small, right, disabled, arrow }: { icon: ReactNode; label: string; onClick: () => void; bold?: boolean; small?: boolean; right?: boolean; disabled?: boolean; arrow?: boolean }) {
   return (
     <button
       className="w-full flex items-center gap-2.5 text-left"
@@ -116,8 +117,18 @@ function MenuRow({ icon, label, onClick, bold, small, right, disabled }: { icon:
       onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = disabled ? "#7d8aa0" : right ? "#0b2e6b" : "#222"; }}
     >
       <span className="shrink-0 flex items-center justify-center" style={{ width: small ? 22 : 28, height: small ? 22 : 28 }}>{icon}</span>
-      <span className="truncate" style={{ fontSize: small ? 11.5 : 12, fontWeight: bold ? 700 : 400 }}>{label}</span>
+      <span className="truncate" style={{ flex: 1, fontSize: small ? 11.5 : 12, fontWeight: bold ? 700 : 400 }}>{label}</span>
+      {arrow && <GreenArrow />}
     </button>
+  );
+}
+
+function GreenArrow() {
+  return (
+    <svg width="9" height="10" viewBox="0 0 9 10" className="shrink-0" style={{ marginLeft: 4 }}>
+      <polygon points="0,0 9,5 0,10" fill="#4caf3f" />
+      <polygon points="0,0 9,5 0,10" fill="none" stroke="#1f6e1f" strokeWidth="0.6" />
+    </svg>
   );
 }
 
