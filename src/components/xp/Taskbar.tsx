@@ -45,7 +45,7 @@ export default function Taskbar({ windows, activeId, startOpen, onStartClick, on
             ? "linear-gradient(to bottom,#1f7a1f,#176a17 50%,#2a8a2a)"
             : "linear-gradient(to bottom,#5cb85c 0%,#3f9f3f 8%,#2f8f2f 45%,#247824 90%,#3a9a3a 100%)",
           border: "none",
-          borderRadius: "0 14px 14px 0",
+          borderRadius: 0,
           color: "#fff", fontWeight: 700, fontSize: 15, fontStyle: "italic",
           letterSpacing: "0.01em", cursor: "pointer",
           textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
