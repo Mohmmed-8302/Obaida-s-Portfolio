@@ -3,10 +3,11 @@ import type { AppId } from "./types";
 import {
   IeIcon, MyComputerIcon, MyDocumentsIcon, RecycleBinIcon, FolderIcon, PaintIcon,
   TicTacToeIcon, MinesweeperIcon, SolitaireIcon, SnakeIcon, ChessIcon, BlockBreakerIcon, RacingIcon,
-  WordIcon, ExcelIcon, PowerPointIcon, NotepadIcon, PhotoViewerIcon, FlappyBirdIcon,
+  WordIcon, ExcelIcon, PowerPointIcon, NotepadIcon, PhotoViewerIcon, FlappyBirdIcon, ControlPanelIcon,
 } from "./icons";
 import InternetExplorer from "./apps/InternetExplorer";
 import FileExplorer from "./apps/FileExplorer";
+import DisplayProperties from "./apps/DisplayProperties";
 import Paint from "./apps/Paint";
 import Notepad from "./apps/Notepad";
 import Word from "./apps/Word";
@@ -130,5 +131,15 @@ export const APPS: Record<AppId, AppMeta> = {
     id: "flappybird", title: "Flappy Bird",
     icon: (s = 16) => <FlappyBirdIcon size={s} />, desktopIcon: (s = 44) => <FlappyBirdIcon size={s} />,
     render: () => <FlappyBird />, defaultSize: { w: 360, h: 560 }, resizable: false,
+  },
+  display: {
+    id: "display", title: "Display Properties",
+    icon: (s = 16) => <ControlPanelIcon size={s} />, desktopIcon: (s = 44) => <ControlPanelIcon size={s} />,
+    render: () => <DisplayProperties />, defaultSize: { w: 420, h: 480 }, minSize: { w: 380, h: 400 }, resizable: false,
+  },
+  controlpanel: {
+    id: "controlpanel", title: "Control Panel",
+    icon: (s = 16) => <ControlPanelIcon size={s} />, desktopIcon: (s = 44) => <ControlPanelIcon size={s} />,
+    render: () => <FileExplorer initialPath="controlpanel" />, defaultSize: { w: 660, h: 470 }, minSize: { w: 420, h: 300 }, resizable: true,
   },
 };
