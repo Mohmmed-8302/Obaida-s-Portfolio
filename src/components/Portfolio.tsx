@@ -280,7 +280,10 @@ function HeroSection() {
           </div>
         </Reveal>
         <Reveal delay={450}>
-          <TrackButton href="#showreel">View Showreel</TrackButton>
+          <TrackButton onClick={() => {
+            const el = document.getElementById("showreel");
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}>View Showreel</TrackButton>
         </Reveal>
       </div>
     </section>
