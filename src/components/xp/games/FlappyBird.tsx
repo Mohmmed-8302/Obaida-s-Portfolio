@@ -206,10 +206,10 @@ export default function FlappyBird() {
       <div style={{ position: "relative", border: "4px solid #2a8f99", borderRadius: 6, boxShadow: "inset 0 0 12px rgba(0,0,0,0.4)", lineHeight: 0 }}>
         <canvas ref={canvasRef} width={W} height={H} style={{ display: "block", borderRadius: 2 }} />
         {state !== "playing" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: "rgba(10,25,32,0.55)", color: "#fff", textAlign: "center", fontFamily: "Tahoma, sans-serif" }}>
-            {state === "over" && <div style={{ fontSize: 24, fontWeight: 800, color: "#ffd24a", textShadow: "0 2px 4px rgba(0,0,0,0.5)", marginBottom: 4 }}>Game Over</div>}
-            {state === "over" && <div style={{ fontSize: 14, marginBottom: 12 }}>Score: <b>{score}</b> · Best: <b>{best}</b></div>}
-            {state === "ready" && <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 10 }}>🐤 Flappy Bird</div>}
+          <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ gap: 12, background: "rgba(10,25,32,0.55)", color: "#fff", textAlign: "center", fontFamily: "Tahoma, sans-serif" }}>
+            {state === "over" && <div style={{ fontSize: 24, fontWeight: 800, color: "#ffd24a", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>Game Over</div>}
+            {state === "over" && <div style={{ fontSize: 14 }}>Score: <b>{score}</b> · Best: <b>{best}</b></div>}
+            {state === "ready" && <div style={{ fontSize: 22, fontWeight: 800 }}>🐤 Flappy Bird</div>}
             <button
               onMouseDown={(e) => { e.stopPropagation(); }}
               onClick={(e) => { e.stopPropagation(); start(); }}
@@ -217,7 +217,7 @@ export default function FlappyBird() {
             >
               {state === "over" ? "Play Again" : "Start"}
             </button>
-            <div style={{ fontSize: 11, marginTop: 10, opacity: 0.85 }}>Click or press Space to flap</div>
+            <div style={{ fontSize: 11, opacity: 0.85 }}>Click or press Space to flap</div>
           </div>
         )}
       </div>
