@@ -14,7 +14,7 @@ import ShutdownDialog from "./ShutdownDialog";
 const SETTINGS_KEY = "xp.settings";
 const ICON_POS_KEY = "xp.iconPositions";
 const GRID_W = 82;
-const GRID_H = 78;
+const GRID_H = 90;
 const GRID_PAD_X = 8;
 const GRID_PAD_Y = 8;
 
@@ -425,9 +425,9 @@ function DesktopIcon({ label, icon, selected, isDragging, x, y, onMouseDown, onO
     <button
       className="absolute flex flex-col items-center gap-0.5 p-1.5 rounded"
       style={{
-        width: GRID_W, left: x, top: y, zIndex: isDragging ? 100 : 1,
+        width: GRID_W, height: GRID_H, left: x, top: y, zIndex: isDragging ? 100 : 1,
         background: "transparent", border: "1px dotted transparent", cursor: "default",
-        opacity: isDragging ? 0.7 : 1,
+        opacity: isDragging ? 0.7 : 1, overflow: "hidden",
       }}
       onMouseDown={onMouseDown}
       onDoubleClick={onOpen}
