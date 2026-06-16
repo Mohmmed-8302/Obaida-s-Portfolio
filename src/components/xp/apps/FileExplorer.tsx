@@ -14,6 +14,10 @@ import {
   useFiles, useRecycleBin, createFile, deleteFile, restoreFile, renameFile,
   permanentlyDelete, emptyRecycleBin, appForDoc, type DocFile,
 } from "../fileStore";
+import {
+  useHiddenKeys, useRemovedShortcuts, removeShortcut, restoreShortcut,
+  purgeShortcut, purgeAllShortcuts, explorerKey, type RemovedShortcut,
+} from "../storage/shortcutStore";
 import { play } from "../storage/sound";
 
 /* ── tiny drive/file glyphs local to the explorer ── */
@@ -66,6 +70,10 @@ interface FsItem {
   detail?: string;
   /** present for user files in fileStore — enables rename/delete/restore. */
   docId?: string;
+  /** present for static folders/apps/shortcuts — enables hide/delete. */
+  hideKey?: string;
+  /** present for a removed shortcut shown in the Recycle Bin — enables restore. */
+  shortcutKey?: string;
 }
 interface FsFolder {
   id: string;
@@ -206,6 +214,16 @@ function fileToItem(f: DocFile): FsItem {
   };
 }
 
+function shortcutToItem(s: RemovedShortcut): FsItem {
+  return {
+    label: s.label,
+    icon: <AppIcon size={32} />,
+    kind: "file",
+    detail: s.kind === "desktop" ? "Desktop shortcut" : "Shortcut",
+    shortcutKey: s.key,
+  };
+}
+
 const NEW_TYPES: { label: string; type: DocType | "bitmap" }[] = [
   { label: "Text Document", type: "text" },
   { label: "Microsoft Word Document", type: "word" },
@@ -218,6 +236,8 @@ export default function FileExplorer({ initialPath = "mycomputer" }: { initialPa
   const { openApp, notify } = useDesktop();
   const files = useFiles();
   const bin = useRecycleBin();
+  const hidden = useHiddenKeys();
+  const removedShortcuts = useRemovedShortcuts();
   const [history, setHistory] = useState<string[]>([initialPath]);
   const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -229,11 +249,16 @@ export default function FileExplorer({ initialPath = "mycomputer" }: { initialPa
   const folderId = history[idx] ?? "mycomputer";
   const base = FS[folderId] ?? FS.mycomputer;
 
+  // Static items, tagged with a hide-key and filtered if the user deleted them.
+  const staticItems: FsItem[] = base.items
+    .map((it) => ({ ...it, hideKey: explorerKey(folderId, it.label) }))
+    .filter((it) => !hidden.has(it.hideKey!));
+
   // Merge dynamic fileStore content into the relevant folders.
   const items: FsItem[] =
-    folderId === "mydocuments" ? [...base.items, ...files.map(fileToItem)]
-    : folderId === "recyclebin" ? bin.map(fileToItem)
-    : base.items;
+    folderId === "mydocuments" ? [...staticItems, ...files.map(fileToItem)]
+    : folderId === "recyclebin" ? [...bin.map(fileToItem), ...removedShortcuts.map(shortcutToItem)]
+    : staticItems;
 
   const current = { ...base, items };
   const canCreate = folderId === "mydocuments";
@@ -264,18 +289,31 @@ export default function FileExplorer({ initialPath = "mycomputer" }: { initialPa
   }, [openApp, notify]);
 
   const doDelete = useCallback((item: FsItem) => {
-    if (!item.docId) return;
-    deleteFile(item.docId);
+    if (item.docId) deleteFile(item.docId);
+    else if (item.hideKey) removeShortcut({ key: item.hideKey, kind: "explorer", label: item.label });
+    else return;
     play("trash");
     notify("Deleted", `“${item.label}” was moved to the Recycle Bin.`);
     setCtx(null); setSelected(null);
   }, [notify]);
 
   const doRestore = useCallback((item: FsItem) => {
-    if (!item.docId) return;
-    restoreFile(item.docId);
-    notify("Restored", `“${item.label}” was restored to My Documents.`);
+    if (item.docId) { restoreFile(item.docId); notify("Restored", `“${item.label}” was restored to My Documents.`); }
+    else if (item.shortcutKey) { restoreShortcut(item.shortcutKey); notify("Restored", `“${item.label}” was restored.`); }
     setCtx(null); setSelected(null);
+  }, [notify]);
+
+  const doPurge = useCallback((item: FsItem) => {
+    if (item.docId) permanentlyDelete(item.docId);
+    else if (item.shortcutKey) purgeShortcut(item.shortcutKey);
+    play("trash");
+    setCtx(null); setSelected(null);
+  }, []);
+
+  const emptyBin = useCallback(() => {
+    emptyRecycleBin(); purgeAllShortcuts(); play("trash");
+    notify("Recycle Bin", "The Recycle Bin is now empty.");
+    setCtx(null); setFileMenu(false);
   }, [notify]);
 
   // Close menus on outside interaction.
@@ -308,7 +346,7 @@ export default function FileExplorer({ initialPath = "mycomputer" }: { initialPa
             {canCreate && NEW_TYPES.map((n) => (
               <MenuRow key={n.label} icon={n.type === "bitmap" ? <PaintIcon size={16} /> : docIcon(n.type as DocType, 16)} label={n.label} onClick={() => createNew(n.type)} />
             ))}
-            {isBin && <MenuRow label="Empty Recycle Bin" onClick={() => { emptyRecycleBin(); play("trash"); notify("Recycle Bin", "The Recycle Bin is now empty."); setFileMenu(false); }} />}
+            {isBin && <MenuRow label="Empty Recycle Bin" onClick={emptyBin} />}
             {!canCreate && !isBin && <MenuRow label="(No actions here)" disabled onClick={() => {}} />}
           </div>
         )}
@@ -339,7 +377,7 @@ export default function FileExplorer({ initialPath = "mycomputer" }: { initialPa
         <div className="shrink-0 overflow-auto" style={{ width: 180, background: "linear-gradient(180deg,#7aa1e8 0%,#6a93e0 8%,#5b86d6 100%)", padding: 10 }}>
           {isBin ? (
             <SidePanel title="Recycle Bin Tasks">
-              <SideLink onClick={() => { emptyRecycleBin(); play("trash"); notify("Recycle Bin", "The Recycle Bin is now empty."); }}>Empty the Recycle Bin</SideLink>
+              <SideLink onClick={emptyBin}>Empty the Recycle Bin</SideLink>
               {selected !== null && current.items[selected]?.docId && (
                 <SideLink onClick={() => doRestore(current.items[selected])}>Restore this item</SideLink>
               )}
@@ -447,10 +485,10 @@ export default function FileExplorer({ initialPath = "mycomputer" }: { initialPa
           onRename={() => { if (ctx.item?.docId) setEditing({ docId: ctx.item.docId, value: ctx.item.label }); setCtx(null); }}
           onDelete={() => { if (ctx.item) doDelete(ctx.item); }}
           onRestore={() => { if (ctx.item) doRestore(ctx.item); }}
-          onPermDelete={() => { if (ctx.item?.docId) { permanentlyDelete(ctx.item.docId); play("trash"); } setCtx(null); }}
+          onPermDelete={() => { if (ctx.item) doPurge(ctx.item); }}
           onProperties={() => { const f = files.concat(bin).find((x) => x.id === ctx.item?.docId); if (f) setProps(f); setCtx(null); }}
           onNew={createNew}
-          onEmptyBin={() => { emptyRecycleBin(); play("trash"); notify("Recycle Bin", "The Recycle Bin is now empty."); setCtx(null); }}
+          onEmptyBin={emptyBin}
         />
       )}
 
@@ -470,11 +508,12 @@ function ContextMenu(props: {
   const left = typeof window !== "undefined" ? Math.min(x, window.innerWidth - 200) : x;
   const top = typeof window !== "undefined" ? Math.min(y, window.innerHeight - 220) : y;
   const userFile = !!item?.docId;
+  const staticItem = !!item?.hideKey;
   return (
     <div className="absolute" onMouseDown={props.onMouseDown} style={{ left, top, zIndex: 60, minWidth: 184, background: "#fff", border: "1px solid #8a8a8a", boxShadow: "3px 3px 10px rgba(0,0,0,0.35)", padding: "2px 0", fontFamily: "Tahoma, sans-serif" }}>
       {item && !isBin && <MenuRow label="Open" bold onClick={props.onOpen} />}
       {item && !isBin && userFile && <MenuRow label="Rename" onClick={props.onRename} />}
-      {item && !isBin && userFile && <MenuRow label="Delete" onClick={props.onDelete} />}
+      {item && !isBin && (userFile || staticItem) && <MenuRow label="Delete" onClick={props.onDelete} />}
       {item && isBin && <MenuRow label="Restore" bold onClick={props.onRestore} />}
       {item && isBin && <MenuRow label="Delete permanently" onClick={props.onPermDelete} />}
       {item && userFile && <Sep />}

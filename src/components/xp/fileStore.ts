@@ -24,6 +24,15 @@ const KEY = "xp.files";
 const SEEDED_KEY = "xp.seeded";
 const listeners = new Set<() => void>();
 let cache: DocFile[] | null = null;
+// Derived, stable snapshots so useSyncExternalStore doesn't loop on a fresh array.
+let liveCache: DocFile[] = [];
+let deletedCache: DocFile[] = [];
+
+function recompute(): void {
+  const all = cache ?? [];
+  liveCache = all.filter((f) => !f.deleted);
+  deletedCache = all.filter((f) => f.deleted);
+}
 
 function uid(): string {
   try {
@@ -34,7 +43,7 @@ function uid(): string {
 
 function read(): DocFile[] {
   if (cache) return cache;
-  if (typeof window === "undefined") return (cache = []);
+  if (typeof window === "undefined") { cache = []; recompute(); return cache; }
   try {
     const raw = window.localStorage.getItem(KEY);
     const parsed = raw ? (JSON.parse(raw) as DocFile[]) : [];
@@ -42,17 +51,23 @@ function read(): DocFile[] {
   } catch {
     cache = [];
   }
+  recompute();
   return cache;
 }
 
 function write(next: DocFile[], sync = true): void {
   cache = next;
+  recompute();
   if (typeof window !== "undefined") {
     try { window.localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* quota / private mode */ }
   }
   listeners.forEach((l) => l());
   if (sync) scheduleCloudPush();
 }
+
+/** Stable snapshot accessors (populate cache on first call). */
+function liveSnapshot(): DocFile[] { read(); return liveCache; }
+function binSnapshot(): DocFile[] { read(); return deletedCache; }
 
 /** Replace the whole store from a cloud snapshot (no re-push). */
 function hydrateFiles(raw: string): void {
@@ -70,14 +85,14 @@ function subscribe(cb: () => void): () => void {
 
 const EMPTY: DocFile[] = [];
 
-/** Reactive, sorted (newest first) list of the visitor's *live* files. */
+/** Reactive list of the visitor's *live* (non-deleted) files. */
 export function useFiles(): DocFile[] {
-  return useSyncExternalStore(subscribe, read, () => EMPTY);
+  return useSyncExternalStore(subscribe, liveSnapshot, () => EMPTY);
 }
 
-/** Reactive list of files currently in the Recycle Bin (most recent first). */
+/** Reactive list of files currently in the Recycle Bin. */
 export function useRecycleBin(): DocFile[] {
-  return useSyncExternalStore(subscribe, read, () => EMPTY);
+  return useSyncExternalStore(subscribe, binSnapshot, () => EMPTY);
 }
 
 export function getFile(id: string): DocFile | undefined {

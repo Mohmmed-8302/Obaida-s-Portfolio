@@ -11,7 +11,7 @@ import { getDeviceId } from "./deviceId";
  *  write. If the Blob store isn't provisioned the API reports configured:false
  *  and we silently stay local-only. */
 
-const SYNC_KEYS = ["xp.files", "xp.settings", "xp.games", "xp.pins", "xp.iconPositions"] as const;
+const SYNC_KEYS = ["xp.files", "xp.settings", "xp.games", "xp.pins", "xp.iconPositions", "xp.removedShortcuts"] as const;
 const SAVED_AT_KEY = "xp.savedAt";
 const MAX_BYTES = 4_000_000;
 

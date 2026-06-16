@@ -7,6 +7,7 @@ import { APPS } from "./xp/registry";
 import { DesktopContext, DEFAULT_SETTINGS, type XpNotice } from "./xp/DesktopContext";
 import { initCloudSync, registerHydrator, scheduleCloudPush } from "./xp/storage/cloudSync";
 import { seedDemoFiles } from "./xp/fileStore";
+import { useHiddenKeys, removeShortcut, desktopKey } from "./xp/storage/shortcutStore";
 import { play, setSoundConfig } from "./xp/storage/sound";
 import XPWindow from "./xp/XPWindow";
 import Taskbar, { TASKBAR_HEIGHT } from "./xp/Taskbar";
@@ -152,6 +153,8 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
   const [notices, setNotices] = useState<XpNotice[]>([]);
   const noticeId = useRef(1);
+  const [iconMenu, setIconMenu] = useState<{ x: number; y: number; id: AppId; label: string } | null>(null);
+  const hiddenKeys = useHiddenKeys();
   const [iconPositions, setIconPositions] = useState<IconPositions>(() => {
     const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
     const vh = typeof window !== "undefined" ? window.innerHeight : 800;
@@ -313,7 +316,15 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
 
   const handleShutdown = useCallback(() => { setShowShutdown(false); onShutdown(); }, [onShutdown]);
 
-  const onDesktopMouseDown = useCallback(() => { setStartOpen(false); setSelectedIcon(null); setCtxMenu(null); }, []);
+  const onDesktopMouseDown = useCallback(() => { setStartOpen(false); setSelectedIcon(null); setCtxMenu(null); setIconMenu(null); }, []);
+
+  const deleteIcon = useCallback((id: AppId, label: string) => {
+    removeShortcut({ key: desktopKey(id), kind: "desktop", appId: id, label });
+    play("trash");
+    notify("Deleted", `“${label}” was moved to the Recycle Bin.`);
+    setIconMenu(null);
+    setSelectedIcon((cur) => (cur === id ? null : cur));
+  }, [notify]);
 
   const onDesktopContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -397,7 +408,7 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
         <div className="absolute inset-0" style={wallpaperStyle(settings)} />
 
         {/* Desktop icons — absolutely positioned, draggable */}
-        {DESKTOP_ICONS.map((d) => {
+        {DESKTOP_ICONS.filter((d) => !hiddenKeys.has(desktopKey(d.id))).map((d) => {
           const isDragging = dragging?.id === d.id;
           const pos = isDragging ? { x: dragging.currentX, y: dragging.currentY } : iconPositions[d.id] ?? { x: 0, y: 0 };
           return (
@@ -409,8 +420,9 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
               isDragging={isDragging}
               x={pos.x}
               y={pos.y}
-              onMouseDown={(e) => { e.stopPropagation(); setSelectedIcon(d.id); onIconDragStart(d.id, e); }}
+              onMouseDown={(e) => { e.stopPropagation(); setSelectedIcon(d.id); setIconMenu(null); if (e.button === 0) onIconDragStart(d.id, e); }}
               onOpen={() => openApp(d.id)}
+              onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setStartOpen(false); setCtxMenu(null); setSelectedIcon(d.id); setIconMenu({ x: e.clientX, y: e.clientY, id: d.id, label: d.label }); }}
             />
           );
         })}
@@ -472,6 +484,16 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
             y={ctxMenu.y}
             onClose={() => setCtxMenu(null)}
             onProperties={() => { setCtxMenu(null); openApp("display"); }}
+          />
+        )}
+
+        {/* Desktop icon right-click menu */}
+        {iconMenu && (
+          <IconMenu
+            x={iconMenu.x}
+            y={iconMenu.y}
+            onOpen={() => { openApp(iconMenu.id); setIconMenu(null); }}
+            onDelete={() => deleteIcon(iconMenu.id, iconMenu.label)}
           />
         )}
 
@@ -546,9 +568,37 @@ function DesktopMenu({ x, y, onClose, onProperties }: { x: number; y: number; on
   );
 }
 
-function DesktopIcon({ label, icon, selected, isDragging, x, y, onMouseDown, onOpen }: {
+function IconMenu({ x, y, onOpen, onDelete }: { x: number; y: number; onOpen: () => void; onDelete: () => void }) {
+  const left = typeof window !== "undefined" ? Math.min(x, window.innerWidth - 160) : x;
+  const top = typeof window !== "undefined" ? Math.min(y, window.innerHeight - 100) : y;
+  const Item = ({ label, onClick, bold }: { label: string; onClick: () => void; bold?: boolean }) => (
+    <button
+      className="w-full text-left"
+      style={{ padding: "4px 22px", border: "none", background: "transparent", fontSize: 11, fontWeight: bold ? 700 : 400, color: "#222", cursor: "pointer" }}
+      onClick={onClick}
+      onMouseEnter={(e) => { e.currentTarget.style.background = "#316ac5"; e.currentTarget.style.color = "#fff"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#222"; }}
+    >
+      {label}
+    </button>
+  );
+  return (
+    <div
+      className="absolute"
+      style={{ left, top, zIndex: 150, minWidth: 150, background: "#fff", border: "1px solid #8a8a8a", boxShadow: "3px 3px 10px rgba(0,0,0,0.35)", padding: "2px 0", fontFamily: "Tahoma, sans-serif" }}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <Item label="Open" onClick={onOpen} bold />
+      <div style={{ height: 1, background: "#d6d2c2", margin: "3px 2px" }} />
+      <Item label="Delete" onClick={onDelete} />
+    </div>
+  );
+}
+
+function DesktopIcon({ label, icon, selected, isDragging, x, y, onMouseDown, onOpen, onContextMenu }: {
   label: string; icon: React.ReactNode; selected: boolean; isDragging: boolean;
   x: number; y: number; onMouseDown: (e: React.MouseEvent) => void; onOpen: () => void;
+  onContextMenu: (e: React.MouseEvent) => void;
 }) {
   return (
     <button
@@ -560,6 +610,7 @@ function DesktopIcon({ label, icon, selected, isDragging, x, y, onMouseDown, onO
       }}
       onMouseDown={onMouseDown}
       onDoubleClick={onOpen}
+      onContextMenu={onContextMenu}
     >
       <span style={{ filter: selected ? "drop-shadow(0 0 1px #fff)" : "drop-shadow(1px 1px 1px rgba(0,0,0,0.5))", opacity: selected ? 0.75 : 1 }}>{icon}</span>
       <span className="text-center leading-tight" style={{
