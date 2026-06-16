@@ -15,10 +15,12 @@ interface StartMenuProps {
   onShutdown: () => void;
 }
 
-const PINNED: AppId[] = ["ie", "paint", "mycomputer"];
-const FREQUENT: AppId[] = ["minesweeper", "solitaire", "tictactoe", "snake"];
-const ALL_GAMES: AppId[] = ["tictactoe", "minesweeper", "solitaire", "snake", "chess", "blockbreaker", "racing"];
-const ALL_PROGRAMS: AppId[] = ["ie", "paint", "mycomputer", "mydocuments"];
+const PINNED: AppId[] = ["ie", "word", "excel", "powerpoint"];
+const FREQUENT: AppId[] = ["notepad", "paint", "photoviewer", "flappybird"];
+const ALL_OFFICE: AppId[] = ["word", "excel", "powerpoint"];
+const ALL_ACCESSORIES: AppId[] = ["notepad", "paint", "photoviewer"];
+const ALL_GAMES: AppId[] = ["tictactoe", "minesweeper", "solitaire", "snake", "chess", "blockbreaker", "racing", "flappybird"];
+const ALL_PROGRAMS: AppId[] = ["ie", "mycomputer", "mydocuments"];
 
 export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuProps) {
   const [showAll, setShowAll] = useState(false);
@@ -68,9 +70,15 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
             {showAll && (
               <div
                 className="absolute"
-                style={{ left: 188, bottom: 0, width: 198, background: "#fff", border: "1px solid #8a8a8a", boxShadow: "3px 3px 10px rgba(0,0,0,0.35)", padding: "4px 0", zIndex: 5 }}
+                style={{ left: 188, bottom: 0, width: 200, maxHeight: 470, overflowY: "auto", background: "#fff", border: "1px solid #8a8a8a", boxShadow: "3px 3px 10px rgba(0,0,0,0.35)", padding: "4px 0", zIndex: 5 }}
                 onMouseLeave={() => setShowAll(false)}
               >
+                <FlyHeader>Microsoft Office</FlyHeader>
+                {ALL_OFFICE.map((id) => <MenuRow key={id} icon={APPS[id].icon(22)} label={shortTitle(id)} small onClick={() => open(id)} />)}
+                <Divider />
+                <FlyHeader>Accessories</FlyHeader>
+                {ALL_ACCESSORIES.map((id) => <MenuRow key={id} icon={APPS[id].icon(22)} label={shortTitle(id)} small onClick={() => open(id)} />)}
+                <Divider />
                 <FlyHeader>Games</FlyHeader>
                 {ALL_GAMES.map((id) => <MenuRow key={id} icon={APPS[id].icon(22)} label={APPS[id].title} small onClick={() => open(id)} />)}
                 <Divider />
@@ -104,7 +112,11 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
 }
 
 function shortTitle(id: AppId): string {
-  const map: Partial<Record<AppId, string>> = { ie: "Internet Explorer", paint: "Paint", mycomputer: "My Computer", mydocuments: "My Documents" };
+  const map: Partial<Record<AppId, string>> = {
+    ie: "Internet Explorer", paint: "Paint", mycomputer: "My Computer", mydocuments: "My Documents",
+    word: "Microsoft Word", excel: "Microsoft Excel", powerpoint: "Microsoft PowerPoint",
+    notepad: "Notepad", photoviewer: "Picture Viewer",
+  };
   return map[id] ?? APPS[id].title;
 }
 

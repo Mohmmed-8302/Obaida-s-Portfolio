@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { AppId, Rect, WindowInstance } from "./xp/types";
+import type { AppId, AppPayload, Rect, WindowInstance } from "./xp/types";
 import { APPS } from "./xp/registry";
 import { DesktopContext } from "./xp/DesktopContext";
 import XPWindow from "./xp/XPWindow";
@@ -20,6 +20,10 @@ const DESKTOP_ICONS: { id: AppId; label: string }[] = [
   { id: "mydocuments", label: "My Documents" },
   { id: "recyclebin", label: "Recycle Bin" },
   { id: "ie", label: "Internet" },
+  { id: "word", label: "Microsoft Word" },
+  { id: "excel", label: "Microsoft Excel" },
+  { id: "powerpoint", label: "PowerPoint" },
+  { id: "notepad", label: "Notepad" },
   { id: "paint", label: "Paint" },
   { id: "games", label: "Games" },
 ];
@@ -30,6 +34,7 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
   const [startOpen, setStartOpen] = useState(false);
   const [showShutdown, setShowShutdown] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+  const [payloads, setPayloads] = useState<Partial<Record<AppId, AppPayload>>>({});
   const zCounter = useRef(10);
   const openCount = useRef(0);
 
@@ -40,8 +45,9 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
     setActiveId(id);
   }, []);
 
-  const openApp = useCallback((appId: AppId) => {
+  const openApp = useCallback((appId: AppId, payload?: AppPayload) => {
     setStartOpen(false);
+    if (payload !== undefined) setPayloads((p) => ({ ...p, [appId]: payload }));
     setWindows((ws) => {
       // singleton: focus existing instance if present
       const existing = ws.find((w) => w.appId === appId);
@@ -130,6 +136,8 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
 
   const onDesktopMouseDown = useCallback(() => { setStartOpen(false); setSelectedIcon(null); }, []);
 
+  const desktopApi = useMemo(() => ({ openApp, payloads }), [openApp, payloads]);
+
   // Esc closes the start menu
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setStartOpen(false); };
@@ -138,7 +146,7 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
   }, []);
 
   return (
-    <DesktopContext.Provider value={{ openApp }}>
+    <DesktopContext.Provider value={desktopApi}>
       <motion.div
         className="absolute inset-0 overflow-hidden"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}

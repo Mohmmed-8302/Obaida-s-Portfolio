@@ -2,12 +2,14 @@
 
 import { useState, useCallback, type ReactNode } from "react";
 import { useDesktop } from "../DesktopContext";
-import type { AppId } from "../types";
+import type { AppId, AppPayload } from "../types";
 import {
   FolderIcon, MyDocumentsIcon, MyComputerIcon, RecycleBinIcon, ControlPanelIcon,
   IeIcon, PaintIcon, TicTacToeIcon, MinesweeperIcon, SolitaireIcon, SnakeIcon,
   ChessIcon, BlockBreakerIcon, RacingIcon, AppIcon,
+  WordIcon, ExcelIcon, PowerPointIcon, NotepadIcon, FlappyBirdIcon,
 } from "../icons";
+import { PHOTOS, photoIndexByName } from "./photos";
 
 /* ── tiny drive/file glyphs local to the explorer ── */
 function HardDrive({ size = 32 }: { size?: number }) {
@@ -35,6 +37,28 @@ function PictureGlyph({ size = 32 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 48 48"><rect x="7" y="10" width="34" height="28" rx="2" fill="#fff" stroke="#9aa3ad" strokeWidth="1.2" /><rect x="10" y="13" width="28" height="22" fill="#bfe0ff" /><circle cx="18" cy="20" r="3" fill="#f2c233" /><path d="M10 35 L20 25 L27 32 L33 26 L38 33 v2 H10 z" fill="#46a85a" /></svg>
   );
 }
+/** Live thumbnail of an actual photo, framed like an XP picture file. */
+function Thumb({ src }: { src: string }) {
+  return (
+    <span style={{ width: 32, height: 32, display: "inline-flex", alignItems: "center", justifyContent: "center", background: "#fff", border: "1px solid #9aa3ad", padding: 1 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" style={{ maxWidth: "100%", maxHeight: "100%", display: "block" }} />
+    </span>
+  );
+}
+
+const ABOUT_TXT = `ABOUT OBAIDA
+============
+
+Motion designer & creative developer.
+
+I build brand animations, title sequences and playful
+interactive experiences for the web — like this very
+Windows XP desktop you're poking around in right now.
+
+Double-click the other files in My Documents to open them
+in Word, Excel and PowerPoint, or browse My Pictures to
+view photos. Have fun!`;
 
 type ItemKind = "drive" | "folder" | "file" | "app";
 interface FsItem {
@@ -43,8 +67,10 @@ interface FsItem {
   kind: ItemKind;
   /** folder id to navigate into */
   target?: string;
-  /** app to launch */
+  /** app to launch (works for kind "app" and openable "file"s) */
   app?: AppId;
+  /** optional data handed to the launched app (photo to view, doc text…) */
+  payload?: AppPayload;
   detail?: string;
 }
 interface FsFolder {
@@ -77,9 +103,19 @@ const FS: Record<string, FsFolder> = {
   programfiles: {
     id: "programfiles", title: "Program Files", parent: "cdrive",
     items: [
+      { label: "Microsoft Office", icon: <FolderIcon size={32} />, kind: "folder", target: "msoffice", detail: "File Folder" },
       { label: "Internet Explorer", icon: <IeIcon size={32} />, kind: "app", app: "ie" },
       { label: "Paint", icon: <PaintIcon size={32} />, kind: "app", app: "paint" },
+      { label: "Notepad", icon: <NotepadIcon size={32} />, kind: "app", app: "notepad" },
       { label: "Games", icon: <FolderIcon size={32} />, kind: "folder", target: "games", detail: "File Folder" },
+    ],
+  },
+  msoffice: {
+    id: "msoffice", title: "Microsoft Office", parent: "programfiles",
+    items: [
+      { label: "Microsoft Word", icon: <WordIcon size={32} />, kind: "app", app: "word" },
+      { label: "Microsoft Excel", icon: <ExcelIcon size={32} />, kind: "app", app: "excel" },
+      { label: "Microsoft PowerPoint", icon: <PowerPointIcon size={32} />, kind: "app", app: "powerpoint" },
     ],
   },
   windows: {
@@ -96,18 +132,26 @@ const FS: Record<string, FsFolder> = {
     items: [
       { label: "My Pictures", icon: <PictureGlyph size={32} />, kind: "folder", target: "mypictures", detail: "File Folder" },
       { label: "My Music", icon: <FolderIcon size={32} />, kind: "folder", target: "mydocuments", detail: "File Folder" },
-      { label: "resume.doc", icon: <FileGlyph size={32} color="#2b6bb0" />, kind: "file", detail: "Microsoft Word Document" },
-      { label: "about_obaida.txt", icon: <FileGlyph size={32} color="#888" />, kind: "file", detail: "Text Document" },
+      { label: "resume.doc", icon: <WordIcon size={32} />, kind: "file", app: "word", detail: "Microsoft Word Document" },
+      { label: "budget.xls", icon: <ExcelIcon size={32} />, kind: "file", app: "excel", detail: "Microsoft Excel Worksheet" },
+      { label: "reel_2025.ppt", icon: <PowerPointIcon size={32} />, kind: "file", app: "powerpoint", detail: "Microsoft PowerPoint Presentation" },
+      {
+        label: "about_obaida.txt", icon: <FileGlyph size={32} color="#888" />, kind: "file", app: "notepad", detail: "Text Document",
+        payload: { kind: "text", name: "about_obaida.txt", content: ABOUT_TXT },
+      },
       { label: "Portfolio", icon: <IeIcon size={32} />, kind: "app", app: "ie", detail: "Internet Shortcut" },
     ],
   },
   mypictures: {
     id: "mypictures", title: "My Pictures", parent: "mydocuments",
-    items: [
-      { label: "Bliss.bmp", icon: <PictureGlyph size={32} />, kind: "file", detail: "Bitmap Image" },
-      { label: "showreel_01.jpg", icon: <PictureGlyph size={32} />, kind: "file", detail: "JPEG Image" },
-      { label: "logo.png", icon: <PictureGlyph size={32} />, kind: "file", detail: "PNG Image" },
-    ],
+    items: PHOTOS.map((p) => ({
+      label: p.name,
+      icon: <Thumb src={p.src} />,
+      kind: "file" as ItemKind,
+      app: "photoviewer" as AppId,
+      payload: { kind: "photo", index: photoIndexByName(p.name), name: p.name } as AppPayload,
+      detail: p.detail,
+    })),
   },
   controlpanel: {
     id: "controlpanel", title: "Control Panel", parent: "mycomputer",
@@ -128,6 +172,7 @@ const FS: Record<string, FsFolder> = {
       { label: "Chess", icon: <ChessIcon size={32} />, kind: "app", app: "chess" },
       { label: "Block Breaker", icon: <BlockBreakerIcon size={32} />, kind: "app", app: "blockbreaker" },
       { label: "Racing", icon: <RacingIcon size={32} />, kind: "app", app: "racing" },
+      { label: "Flappy Bird", icon: <FlappyBirdIcon size={32} />, kind: "app", app: "flappybird" },
     ],
   },
   recyclebin: {
@@ -165,7 +210,7 @@ export default function FileExplorer({ initialPath = "mycomputer" }: { initialPa
   const up = useCallback(() => { if (current.parent) navigate(current.parent); }, [current.parent, navigate]);
 
   const openItem = useCallback((item: FsItem) => {
-    if (item.kind === "app" && item.app) openApp(item.app);
+    if (item.app) openApp(item.app, item.payload);
     else if (item.target) navigate(item.target);
   }, [openApp, navigate]);
 

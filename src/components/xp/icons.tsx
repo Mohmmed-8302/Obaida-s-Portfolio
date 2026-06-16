@@ -413,6 +413,117 @@ export function AppIcon({ size = 32, style }: IconProps) {
   );
 }
 
+/* ── Microsoft Word ────────────────────────────────────────────────────── */
+export function WordIcon({ size = 32, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <defs>
+        <linearGradient id="wd-b" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#5b9bd5" />
+          <stop offset="100%" stopColor="#2b5797" />
+        </linearGradient>
+      </defs>
+      <rect x="10" y="5" width="30" height="38" rx="2.5" fill="#fff" stroke="#b9c2cc" strokeWidth="1.2" />
+      <rect x="14" y="11" width="22" height="2.6" rx="1" fill="#9fb6cc" />
+      <rect x="14" y="16" width="22" height="2.6" rx="1" fill="#cdd7e2" />
+      <rect x="14" y="21" width="22" height="2.6" rx="1" fill="#cdd7e2" />
+      <rect x="14" y="26" width="16" height="2.6" rx="1" fill="#cdd7e2" />
+      <rect x="4" y="14" width="24" height="22" rx="3" fill="url(#wd-b)" />
+      <text x="16" y="31" textAnchor="middle" fontFamily="Georgia, 'Times New Roman', serif" fontWeight="700" fontSize="18" fill="#fff">W</text>
+    </Svg>
+  );
+}
+
+/* ── Microsoft Excel ───────────────────────────────────────────────────── */
+export function ExcelIcon({ size = 32, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <defs>
+        <linearGradient id="xl-b" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#57b97f" />
+          <stop offset="100%" stopColor="#1d7045" />
+        </linearGradient>
+      </defs>
+      <rect x="10" y="5" width="30" height="38" rx="2.5" fill="#fff" stroke="#b9c2cc" strokeWidth="1.2" />
+      <g stroke="#cdd7e2" strokeWidth="1">
+        <line x1="14" y1="12" x2="36" y2="12" /><line x1="14" y1="18" x2="36" y2="18" />
+        <line x1="14" y1="24" x2="36" y2="24" /><line x1="14" y1="30" x2="36" y2="30" />
+        <line x1="22" y1="9" x2="22" y2="38" /><line x1="29" y1="9" x2="29" y2="38" />
+      </g>
+      <rect x="4" y="14" width="24" height="22" rx="3" fill="url(#xl-b)" />
+      <text x="16" y="31" textAnchor="middle" fontFamily="Georgia, 'Times New Roman', serif" fontWeight="700" fontSize="18" fill="#fff">X</text>
+    </Svg>
+  );
+}
+
+/* ── Microsoft PowerPoint ──────────────────────────────────────────────── */
+export function PowerPointIcon({ size = 32, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <defs>
+        <linearGradient id="pp-b" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#e9824a" />
+          <stop offset="100%" stopColor="#c0451b" />
+        </linearGradient>
+      </defs>
+      <rect x="10" y="5" width="30" height="38" rx="2.5" fill="#fff" stroke="#b9c2cc" strokeWidth="1.2" />
+      <circle cx="25" cy="20" r="7" fill="none" stroke="#e9824a" strokeWidth="2.4" />
+      <rect x="14" y="30" width="22" height="2.6" rx="1" fill="#cdd7e2" />
+      <rect x="14" y="35" width="16" height="2.6" rx="1" fill="#cdd7e2" />
+      <rect x="4" y="14" width="24" height="22" rx="3" fill="url(#pp-b)" />
+      <text x="16" y="31" textAnchor="middle" fontFamily="Georgia, 'Times New Roman', serif" fontWeight="700" fontSize="18" fill="#fff">P</text>
+    </Svg>
+  );
+}
+
+/* ── Notepad ───────────────────────────────────────────────────────────── */
+export function NotepadIcon({ size = 32, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M12 5 h18 l8 8 v30 a1 1 0 0 1 -1 1 H12 a1 1 0 0 1 -1 -1 V6 a1 1 0 0 1 1 -1z" fill="#fff" stroke="#8aa0b6" strokeWidth="1.2" />
+      <path d="M30 5 v8 h8z" fill="#dfe7ef" stroke="#8aa0b6" strokeWidth="1" />
+      <g stroke="#5e9bd6" strokeWidth="1.6">
+        <line x1="15" y1="20" x2="33" y2="20" /><line x1="15" y1="25" x2="33" y2="25" />
+        <line x1="15" y1="30" x2="33" y2="30" /><line x1="15" y1="35" x2="27" y2="35" />
+      </g>
+      <rect x="6" y="6" width="6" height="38" fill="#3b7fd1" opacity="0.85" />
+    </Svg>
+  );
+}
+
+/* ── Windows Picture & Fax Viewer ──────────────────────────────────────── */
+export function PhotoViewerIcon({ size = 32, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <rect x="5" y="9" width="38" height="30" rx="2.5" fill="#fff" stroke="#8a939c" strokeWidth="1.4" />
+      <rect x="8" y="12" width="32" height="24" fill="#bfe0ff" />
+      <circle cx="17" cy="19" r="3.2" fill="#ffd24a" />
+      <path d="M8 36 L19 24 L26 31 L32 25 L40 33 v3 H8 z" fill="#46a85a" />
+      <path d="M8 36 L19 24 L26 31 L32 25 L40 33" fill="#3a8b4c" opacity="0.4" />
+    </Svg>
+  );
+}
+
+/* ── Flappy Bird ───────────────────────────────────────────────────────── */
+export function FlappyBirdIcon({ size = 32, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <rect x="4" y="4" width="40" height="40" rx="4" fill="#4ec0ca" stroke="#2a8f99" strokeWidth="1.2" />
+      <rect x="4" y="34" width="40" height="10" fill="#ded895" />
+      <rect x="4" y="34" width="40" height="3" fill="#5ec84e" />
+      {/* pipe */}
+      <rect x="30" y="20" width="9" height="14" fill="#5ec84e" stroke="#3a8b3a" strokeWidth="1" />
+      <rect x="29" y="18" width="11" height="4" fill="#74d863" stroke="#3a8b3a" strokeWidth="1" />
+      {/* bird */}
+      <circle cx="18" cy="22" r="7" fill="#ffd24a" stroke="#d99a1e" strokeWidth="1" />
+      <circle cx="21" cy="20" r="2.4" fill="#fff" stroke="#333" strokeWidth="0.6" />
+      <circle cx="22" cy="20" r="1" fill="#222" />
+      <path d="M24 23 l5 -1 -5 -2 z" fill="#f08a2a" />
+      <path d="M12 23 q3 4 6 0 z" fill="#fff" opacity="0.85" />
+    </Svg>
+  );
+}
+
 /* ── The little 4-colour XP "flag" used on the Start button ─────────────── */
 export function XPFlag({ size = 22, style }: IconProps) {
   return (

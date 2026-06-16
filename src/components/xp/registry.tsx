@@ -3,10 +3,16 @@ import type { AppId } from "./types";
 import {
   IeIcon, MyComputerIcon, MyDocumentsIcon, RecycleBinIcon, FolderIcon, PaintIcon,
   TicTacToeIcon, MinesweeperIcon, SolitaireIcon, SnakeIcon, ChessIcon, BlockBreakerIcon, RacingIcon,
+  WordIcon, ExcelIcon, PowerPointIcon, NotepadIcon, PhotoViewerIcon, FlappyBirdIcon,
 } from "./icons";
 import InternetExplorer from "./apps/InternetExplorer";
 import FileExplorer from "./apps/FileExplorer";
 import Paint from "./apps/Paint";
+import Notepad from "./apps/Notepad";
+import Word from "./apps/Word";
+import Excel from "./apps/Excel";
+import PowerPoint from "./apps/PowerPoint";
+import PhotoViewer from "./apps/PhotoViewer";
 import TicTacToe from "./games/TicTacToe";
 import Minesweeper from "./games/Minesweeper";
 import Solitaire from "./games/Solitaire";
@@ -14,6 +20,7 @@ import Snake from "./games/Snake";
 import Chess from "./games/Chess";
 import BlockBreaker from "./games/BlockBreaker";
 import Racing from "./games/Racing";
+import FlappyBird from "./games/FlappyBird";
 
 export interface AppMeta {
   id: AppId;
@@ -59,6 +66,31 @@ export const APPS: Record<AppId, AppMeta> = {
     icon: (s = 16) => <PaintIcon size={s} />, desktopIcon: (s = 44) => <PaintIcon size={s} />,
     render: () => <Paint />, defaultSize: { w: 700, h: 540 }, minSize: { w: 520, h: 420 }, resizable: true,
   },
+  notepad: {
+    id: "notepad", title: "Untitled — Notepad",
+    icon: (s = 16) => <NotepadIcon size={s} />, desktopIcon: (s = 44) => <NotepadIcon size={s} />,
+    render: () => <Notepad />, defaultSize: { w: 560, h: 440 }, minSize: { w: 320, h: 240 }, resizable: true,
+  },
+  word: {
+    id: "word", title: "Document1 — Microsoft Word",
+    icon: (s = 16) => <WordIcon size={s} />, desktopIcon: (s = 44) => <WordIcon size={s} />,
+    render: () => <Word />, defaultSize: { w: 720, h: 560 }, minSize: { w: 480, h: 360 }, resizable: true,
+  },
+  excel: {
+    id: "excel", title: "Book1 — Microsoft Excel",
+    icon: (s = 16) => <ExcelIcon size={s} />, desktopIcon: (s = 44) => <ExcelIcon size={s} />,
+    render: () => <Excel />, defaultSize: { w: 720, h: 520 }, minSize: { w: 480, h: 340 }, resizable: true,
+  },
+  powerpoint: {
+    id: "powerpoint", title: "Presentation1 — Microsoft PowerPoint",
+    icon: (s = 16) => <PowerPointIcon size={s} />, desktopIcon: (s = 44) => <PowerPointIcon size={s} />,
+    render: () => <PowerPoint />, defaultSize: { w: 760, h: 560 }, minSize: { w: 520, h: 400 }, resizable: true,
+  },
+  photoviewer: {
+    id: "photoviewer", title: "Windows Picture and Fax Viewer",
+    icon: (s = 16) => <PhotoViewerIcon size={s} />, desktopIcon: (s = 44) => <PhotoViewerIcon size={s} />,
+    render: () => <PhotoViewer />, defaultSize: { w: 620, h: 520 }, minSize: { w: 360, h: 320 }, resizable: true,
+  },
   tictactoe: {
     id: "tictactoe", title: "Tic-Tac-Toe",
     icon: (s = 16) => <TicTacToeIcon size={s} />, desktopIcon: (s = 44) => <TicTacToeIcon size={s} />,
@@ -93,5 +125,10 @@ export const APPS: Record<AppId, AppMeta> = {
     id: "racing", title: "Road Racer",
     icon: (s = 16) => <RacingIcon size={s} />, desktopIcon: (s = 44) => <RacingIcon size={s} />,
     render: () => <Racing />, defaultSize: { w: 352, h: 560 }, resizable: false,
+  },
+  flappybird: {
+    id: "flappybird", title: "Flappy Bird",
+    icon: (s = 16) => <FlappyBirdIcon size={s} />, desktopIcon: (s = 44) => <FlappyBirdIcon size={s} />,
+    render: () => <FlappyBird />, defaultSize: { w: 360, h: 560 }, resizable: false,
   },
 };
