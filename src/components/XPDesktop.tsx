@@ -52,12 +52,14 @@ type IconPositions = Record<string, { x: number; y: number }>;
 
 function computeDefaultPositions(vw: number, vh: number): IconPositions {
   const usableH = vh - TASKBAR_HEIGHT - GRID_PAD_Y * 2;
-  const rows = Math.max(1, Math.floor(usableH / GRID_H));
+  const maxRows = Math.max(1, Math.floor(usableH / GRID_H));
+  const maxCols = Math.max(1, Math.floor((vw - GRID_PAD_X) / GRID_W));
   const pos: IconPositions = {};
   DESKTOP_ICONS.forEach((d, i) => {
-    const col = Math.floor(i / rows);
-    const row = i % rows;
-    pos[d.id] = { x: GRID_PAD_X + col * GRID_W, y: GRID_PAD_Y + row * GRID_H };
+    const col = Math.floor(i / maxRows);
+    const row = i % maxRows;
+    const safeCol = col < maxCols ? col : maxCols - 1;
+    pos[d.id] = { x: GRID_PAD_X + safeCol * GRID_W, y: GRID_PAD_Y + row * GRID_H };
   });
   return pos;
 }
@@ -71,11 +73,45 @@ function loadIconPositions(): IconPositions | null {
   } catch { return null; }
 }
 
+function positionsAreValid(positions: IconPositions, vw: number, vh: number): boolean {
+  const maxX = vw - GRID_W;
+  const maxY = vh - TASKBAR_HEIGHT - GRID_H;
+  const entries = Object.values(positions);
+  for (const pos of entries) {
+    if (pos.x < 0 || pos.x > maxX || pos.y < 0 || pos.y > maxY) return false;
+  }
+  for (let i = 0; i < entries.length; i++) {
+    for (let j = i + 1; j < entries.length; j++) {
+      if (Math.abs(entries[i].x - entries[j].x) < GRID_W && Math.abs(entries[i].y - entries[j].y) < GRID_H) return false;
+    }
+  }
+  return true;
+}
+
 function snapToGrid(x: number, y: number): { x: number; y: number } {
   return {
     x: Math.max(0, Math.round(x / GRID_W) * GRID_W + GRID_PAD_X),
     y: Math.max(0, Math.round(y / GRID_H) * GRID_H + GRID_PAD_Y),
   };
+}
+
+function findFreeCell(target: { x: number; y: number }, positions: IconPositions, dragId: string, vw: number, vh: number): { x: number; y: number } {
+  const occupied = Object.entries(positions).filter(([id]) => id !== dragId).map(([, p]) => p);
+  const isOccupied = (x: number, y: number) => occupied.some((p) => p.x === x && p.y === y);
+  if (!isOccupied(target.x, target.y)) return target;
+  const maxY = vh - TASKBAR_HEIGHT - GRID_H;
+  const maxX = vw - GRID_W;
+  for (let dist = 1; dist < 20; dist++) {
+    for (let dy = -dist; dy <= dist; dy++) {
+      for (let dx = -dist; dx <= dist; dx++) {
+        if (Math.abs(dx) !== dist && Math.abs(dy) !== dist) continue;
+        const x = target.x + dx * GRID_W;
+        const y = target.y + dy * GRID_H;
+        if (x >= 0 && x <= maxX && y >= 0 && y <= maxY && !isOccupied(x, y)) return { x, y };
+      }
+    }
+  }
+  return target;
 }
 
 export default function XPDesktop({ onShutdown }: XPDesktopProps) {
@@ -88,10 +124,10 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
   const [settings, setSettings] = useState<XpSettings>(loadSettings);
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
   const [iconPositions, setIconPositions] = useState<IconPositions>(() => {
-    const saved = loadIconPositions();
-    if (saved && Object.keys(saved).length >= DESKTOP_ICONS.length) return saved;
     const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
     const vh = typeof window !== "undefined" ? window.innerHeight : 800;
+    const saved = loadIconPositions();
+    if (saved && Object.keys(saved).length >= DESKTOP_ICONS.length && positionsAreValid(saved, vw, vh)) return saved;
     return computeDefaultPositions(vw, vh);
   });
   const [dragging, setDragging] = useState<{ id: string; offsetX: number; offsetY: number; currentX: number; currentY: number } | null>(null);
@@ -224,6 +260,19 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
     try { window.localStorage.setItem(ICON_POS_KEY, JSON.stringify(iconPositions)); } catch { /* ignore */ }
   }, [iconPositions]);
 
+  // Recompute icon positions when viewport resizes and current positions are invalid
+  useEffect(() => {
+    const onResize = () => {
+      const vw = window.innerWidth, vh = window.innerHeight;
+      setIconPositions((prev) => {
+        if (positionsAreValid(prev, vw, vh)) return prev;
+        return computeDefaultPositions(vw, vh);
+      });
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   // Drag move/up handlers (attached to window during drag)
   useEffect(() => {
     if (!dragging) return;
@@ -242,7 +291,10 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
       const rawY = Math.max(0, Math.min(e.clientY - dragging.offsetY, maxY));
       const snapped = snapToGrid(rawX, rawY);
       snapped.y = Math.min(snapped.y, maxY);
-      setIconPositions((prev) => ({ ...prev, [dragging.id]: snapped }));
+      setIconPositions((prev) => {
+        const free = findFreeCell(snapped, prev, dragging.id, window.innerWidth, window.innerHeight);
+        return { ...prev, [dragging.id]: free };
+      });
       setDragging(null);
     };
     window.addEventListener("mousemove", onMove);
