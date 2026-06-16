@@ -19,6 +19,7 @@ const PIPE_SPACING = 200; // horizontal px between pipes
 interface Pipe { x: number; gapY: number; passed: boolean; }
 
 export default function FlappyBird() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(0);
@@ -44,6 +45,7 @@ export default function FlappyBird() {
     reset();
     bird.current.v = FLAP;
     setState("playing");
+    setTimeout(() => containerRef.current?.focus(), 0);
   }, [reset]);
 
   const flap = useCallback(() => {
@@ -192,9 +194,10 @@ export default function FlappyBird() {
 
   return (
     <div
+      ref={containerRef}
       tabIndex={0}
       onKeyDown={onKey}
-      onMouseDown={(e) => { e.preventDefault(); (e.currentTarget as HTMLElement).focus(); flap(); }}
+      onMouseDown={(e) => { e.preventDefault(); containerRef.current?.focus(); flap(); }}
       className="absolute inset-0 flex flex-col items-center justify-center outline-none"
       style={{ background: "linear-gradient(160deg,#1b3a4b,#0d1f2a)", padding: 10, cursor: "pointer" }}
     >

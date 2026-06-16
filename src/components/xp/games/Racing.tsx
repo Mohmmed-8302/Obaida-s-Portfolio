@@ -16,6 +16,7 @@ export default function Racing() {
   const [distance, setDistance] = useState(0);
   const [best, setBest] = useState(0);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const lane = useRef(1);
   const targetX = useRef(LANE_W * 1 + LANE_W / 2);
   const carX = useRef(LANE_W * 1 + LANE_W / 2);
@@ -25,7 +26,6 @@ export default function Racing() {
   const distRef = useRef(0);
   const spawnT = useRef(0);
   const raf = useRef(0);
-  const keys = useRef<Set<string>>(new Set());
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -38,6 +38,7 @@ export default function Racing() {
     distRef.current = 0; setDistance(0);
     spawnT.current = 0;
     setState("playing");
+    setTimeout(() => containerRef.current?.focus(), 0);
   }, []);
 
   const move = useCallback((dir: -1 | 1) => {
@@ -123,11 +124,7 @@ export default function Racing() {
     const ctx = cv.getContext("2d")!;
     const loop = () => {
       raf.current = requestAnimationFrame(loop);
-      if (stateRef.current === "playing") {
-        if (keys.current.has("arrowleft")) { move(-1); keys.current.delete("arrowleft"); }
-        if (keys.current.has("arrowright")) { move(1); keys.current.delete("arrowright"); }
-        update();
-      }
+      if (stateRef.current === "playing") update();
       draw(ctx);
     };
     raf.current = requestAnimationFrame(loop);
@@ -141,7 +138,7 @@ export default function Racing() {
   }, [move]);
 
   return (
-    <div tabIndex={0} onKeyDown={onKey} className="absolute inset-0 flex flex-col items-center justify-center outline-none" style={{ fontFamily: "Tahoma, sans-serif", background: "#16321a", padding: 10 }}>
+    <div ref={containerRef} tabIndex={0} onKeyDown={onKey} onMouseDown={() => containerRef.current?.focus()} className="absolute inset-0 flex flex-col items-center justify-center outline-none" style={{ fontFamily: "Tahoma, sans-serif", background: "#16321a", padding: 10 }}>
       <div className="flex items-center justify-between mb-2" style={{ width: W, color: "#dff3e0", fontSize: 12 }}>
         <span>Distance: <b>{distance}m</b></span>
         <span>Best: <b>{best}m</b></span>

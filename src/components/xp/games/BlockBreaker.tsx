@@ -16,6 +16,7 @@ export default function BlockBreaker() {
   const [lives, setLives] = useState(3);
   const [level, setLevel] = useState(1);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const bricks = useRef<boolean[]>([]);
   const paddleX = useRef(W / 2 - PADDLE_W / 2);
   const ball = useRef({ x: W / 2, y: H - 40, vx: 3, vy: -3 });
@@ -39,12 +40,14 @@ export default function BlockBreaker() {
     setLevel(1); levelRef.current = 1;
     resetBricks(); resetBall();
     setState("playing");
+    setTimeout(() => containerRef.current?.focus(), 0);
   }, [resetBricks, resetBall]);
 
   const nextLevel = useCallback(() => {
     levelRef.current += 1; setLevel(levelRef.current);
     resetBricks(); resetBall();
     setState("playing");
+    setTimeout(() => containerRef.current?.focus(), 0);
   }, [resetBricks, resetBall]);
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -133,13 +136,14 @@ export default function BlockBreaker() {
   }, []);
 
   const onKey = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "ArrowLeft") paddleX.current = Math.max(0, paddleX.current - 28);
-    if (e.key === "ArrowRight") paddleX.current = Math.min(W - PADDLE_W, paddleX.current + 28);
-    if (e.key === " ") { e.preventDefault(); setState((s) => s === "playing" ? "paused" : s === "paused" ? "playing" : s); }
+    const k = e.key.toLowerCase();
+    if (k === "arrowleft" || k === "a") { paddleX.current = Math.max(0, paddleX.current - 28); e.preventDefault(); }
+    if (k === "arrowright" || k === "d") { paddleX.current = Math.min(W - PADDLE_W, paddleX.current + 28); e.preventDefault(); }
+    if (k === " ") { e.preventDefault(); setState((s) => s === "playing" ? "paused" : s === "paused" ? "playing" : s); }
   }, []);
 
   return (
-    <div tabIndex={0} onKeyDown={onKey} className="absolute inset-0 flex flex-col items-center justify-center outline-none" style={{ fontFamily: "Tahoma, sans-serif", background: "#1a1f2b", padding: 10 }}>
+    <div ref={containerRef} tabIndex={0} onKeyDown={onKey} onMouseDown={() => containerRef.current?.focus()} className="absolute inset-0 flex flex-col items-center justify-center outline-none" style={{ fontFamily: "Tahoma, sans-serif", background: "#1a1f2b", padding: 10 }}>
       <div className="flex items-center justify-between mb-2" style={{ width: W, color: "#cfe0ff", fontSize: 12 }}>
         <span>Score: <b>{score}</b></span>
         <span>Level: <b>{level}</b></span>
