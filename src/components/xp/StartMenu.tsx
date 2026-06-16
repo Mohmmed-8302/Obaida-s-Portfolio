@@ -37,9 +37,9 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
     >
       <div style={{ border: "1px solid #0831a8", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "4px 4px 18px rgba(0,0,0,0.5)" }}>
         {/* Header */}
-        <div className="flex items-center gap-3 px-3" style={{ height: 68, background: "linear-gradient(to bottom,#1f60db 0%,#3f8af0 45%,#2870e6 55%,#13409e 100%)", borderBottom: "2px solid #f5b840" }}>
-          <div style={{ width: 48, height: 48, borderRadius: 6, overflow: "hidden", border: "3px solid rgba(255,255,255,0.85)", background: "linear-gradient(135deg,#c97a8a,#8a3e51)", display: "flex", alignItems: "flex-end", justifyContent: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
-            <svg width="40" height="35" viewBox="0 0 34 30"><circle cx="17" cy="11" r="7" fill="#fff" opacity="0.95" /><path d="M3 30 c0-9 7-13 14-13 s14 4 14 13z" fill="#fff" opacity="0.95" /></svg>
+        <div className="flex items-center gap-3 px-4" style={{ height: 68, background: "linear-gradient(to bottom,#1f60db 0%,#3f8af0 45%,#2870e6 55%,#13409e 100%)", borderBottom: "2px solid #f5b840" }}>
+          <div style={{ width: 50, height: 50, borderRadius: "50%", overflow: "hidden", border: "3px solid rgba(255,255,255,0.9)", background: "linear-gradient(135deg,#c97a8a,#8a3e51)", display: "flex", alignItems: "flex-end", justifyContent: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.45)" }}>
+            <svg width="42" height="38" viewBox="0 0 34 30"><circle cx="17" cy="11" r="7" fill="#fff" opacity="0.95" /><path d="M3 30 c0-9 7-13 14-13 s14 4 14 13z" fill="#fff" opacity="0.95" /></svg>
           </div>
           <span style={{ color: "#fff", fontWeight: 700, fontSize: 19, textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}>Obaida</span>
         </div>
@@ -80,20 +80,21 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
           </div>
 
           {/* Right pane */}
-          <div style={{ width: 184, background: "linear-gradient(to bottom,#d3e5fa,#cfe0f7)", padding: "6px 0", borderLeft: "1px solid #b5cbe8" }}>
+          <div style={{ width: 184, background: "linear-gradient(to bottom,#d3e5fa,#cfe0f7)", padding: "8px 0", borderLeft: "1px solid #b5cbe8" }}>
             <MenuRow icon={<MyDocumentsIcon size={24} />} label="My Documents" onClick={() => open("mydocuments")} right bold />
             <MenuRow icon={<MyComputerIcon size={24} />} label="My Computer" onClick={() => open("mycomputer")} right bold />
-            <MenuRow icon={<FolderIcon size={24} />} label="Games" onClick={() => open("games")} right />
+            <MenuRow icon={<FolderIcon size={24} />} label="Games" onClick={() => open("games")} right submenu />
             <DividerBlue />
             <MenuRow icon={<ControlPanelIcon size={24} />} label="Control Panel" onClick={() => {}} right disabled />
-            <MenuRow icon={<HelpIcon size={24} />} label="Help and Support" onClick={() => {}} right disabled />
-            <MenuRow icon={<SearchIcon size={24} />} label="Search" onClick={() => {}} right disabled />
             <MenuRow icon={<RunIcon size={24} />} label="Run..." onClick={() => {}} right disabled />
+            <DividerBlue />
+            <MenuRow icon={<SearchIcon size={24} />} label="Search" onClick={() => {}} right disabled submenu />
+            <MenuRow icon={<HelpIcon size={24} />} label="Help and Support" onClick={() => {}} right disabled />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-4 px-4" style={{ height: 40, background: "linear-gradient(to bottom,#3f8af0,#1f60db 40%,#13409e)", borderTop: "1px solid #5a93ec" }}>
+        <div className="flex items-center justify-end gap-4" style={{ height: 42, padding: "0 16px", background: "linear-gradient(to bottom,#3f8af0,#1f60db 40%,#13409e)", borderTop: "1px solid #5a93ec" }}>
           <FooterBtn icon={<LogOffIcon size={26} />} label="Log Off" onClick={onShutdown} />
           <FooterBtn icon={<TurnOffIcon size={26} />} label="Turn Off Computer" onClick={onShutdown} />
         </div>
@@ -107,11 +108,11 @@ function shortTitle(id: AppId): string {
   return map[id] ?? APPS[id].title;
 }
 
-function MenuRow({ icon, label, onClick, bold, small, right, disabled, arrow }: { icon: ReactNode; label: string; onClick: () => void; bold?: boolean; small?: boolean; right?: boolean; disabled?: boolean; arrow?: boolean }) {
+function MenuRow({ icon, label, onClick, bold, small, right, disabled, arrow, submenu }: { icon: ReactNode; label: string; onClick: () => void; bold?: boolean; small?: boolean; right?: boolean; disabled?: boolean; arrow?: boolean; submenu?: boolean }) {
   return (
     <button
       className="w-full flex items-center gap-2.5 text-left"
-      style={{ padding: small ? "3px 12px" : "5px 12px", border: "none", background: "transparent", cursor: disabled ? "default" : "pointer", color: disabled ? "#7d8aa0" : right ? "#0b2e6b" : "#222" }}
+      style={{ padding: small ? "3px 14px" : "5px 14px", border: "none", background: "transparent", cursor: disabled ? "default" : "pointer", color: disabled ? "#7d8aa0" : right ? "#0b2e6b" : "#222" }}
       onClick={disabled ? undefined : onClick}
       onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = "#2f71d8"; e.currentTarget.style.color = "#fff"; } }}
       onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = disabled ? "#7d8aa0" : right ? "#0b2e6b" : "#222"; }}
@@ -119,6 +120,7 @@ function MenuRow({ icon, label, onClick, bold, small, right, disabled, arrow }: 
       <span className="shrink-0 flex items-center justify-center" style={{ width: small ? 22 : 28, height: small ? 22 : 28 }}>{icon}</span>
       <span className="truncate" style={{ flex: 1, fontSize: small ? 11.5 : 12, fontWeight: bold ? 700 : 400 }}>{label}</span>
       {arrow && <GreenArrow />}
+      {submenu && <span className="shrink-0" style={{ fontSize: 9, marginLeft: 4, color: disabled ? "#9aa6bb" : "#3a5f9e" }}>▶</span>}
     </button>
   );
 }

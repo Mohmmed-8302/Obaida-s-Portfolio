@@ -33,7 +33,12 @@
   --font-display: 'Cambria Custom', 'Cambria', Georgia, serif;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* Keep the reset in the base layer so Tailwind utility classes
+   (px-*, py-*, m-*, etc., which live in the later `utilities` layer)
+   still win — an unlayered `*` rule would override every one of them. */
+@layer base {
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+}
 
 body {
   overflow: hidden;
