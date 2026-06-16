@@ -18,6 +18,39 @@ const WALLPAPERS: { name: string; wallpaper: string }[] = [
 
 const BG_COLORS = ["#3a6ea5", "#0b5e8a", "#5a7a3a", "#6b6b6b", "#102a54", "#2d1b3d"];
 
+const THEME_OPTIONS: { value: XpSettings["theme"]; label: string }[] = [
+  { value: "blue", label: "Windows XP (Blue)" },
+  { value: "olive", label: "Olive Green" },
+  { value: "silver", label: "Silver" },
+];
+
+/** Read an image file, downscale it to <=1280px wide, return a JPEG data-URL.
+ *  Keeps custom wallpapers small enough to persist and cloud-sync. */
+function loadDownscaledDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 1280;
+        const scale = Math.min(1, max / img.width);
+        const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const cx = canvas.getContext("2d");
+        if (!cx) { resolve(String(reader.result)); return; }
+        cx.drawImage(img, 0, 0, w, h);
+        try { resolve(canvas.toDataURL("image/jpeg", 0.82)); }
+        catch { resolve(String(reader.result)); }
+      };
+      img.onerror = reject;
+      img.src = String(reader.result);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 const SAVERS: { value: XpSettings["screensaver"]["type"]; label: string }[] = [
   { value: "none", label: "(None)" },
   { value: "starfield", label: "Starfield" },
@@ -70,8 +103,8 @@ export default function DisplayProperties() {
           {tab === "Desktop" && <DesktopTab settings={settings} updateSettings={updateSettings} />}
           {tab === "Screen Saver" && <ScreenSaverTab settings={settings} updateSettings={updateSettings} />}
           {tab === "Settings" && <SettingsTab settings={settings} updateSettings={updateSettings} />}
-          {tab === "Themes" && <ThemesTab />}
-          {tab === "Appearance" && <AppearanceTab />}
+          {tab === "Themes" && <ThemesTab settings={settings} updateSettings={updateSettings} />}
+          {tab === "Appearance" && <AppearanceTab settings={settings} updateSettings={updateSettings} />}
         </div>
       </div>
 
@@ -107,12 +140,34 @@ function MonitorPreview({ settings }: { settings: XpSettings }) {
 }
 
 function DesktopTab({ settings, updateSettings }: TabProps) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const isCustom = !!settings.wallpaper && !WALLPAPERS.some((w) => w.wallpaper === settings.wallpaper);
+
+  const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const url = await loadDownscaledDataUrl(file);
+      updateSettings({ wallpaper: url, wallpaperName: file.name.replace(/\.[^.]+$/, "") });
+    } catch { /* ignore unreadable image */ }
+  };
+
   return (
     <Group label="Background">
       <div style={{ display: "flex", gap: 12 }}>
         <div style={{ flex: 1, border: "1px solid #7f9db9", height: 132, overflow: "auto", background: "#fff" }}>
+          {isCustom && (
+            <button
+              className="w-full flex items-center gap-2 text-left"
+              style={{ padding: "3px 8px", border: "none", fontSize: 11, cursor: "pointer", background: "#316ac5", color: "#fff" }}
+            >
+              <span style={{ width: 14, height: 11, display: "inline-block", border: "1px solid #888", background: `center/cover url('${settings.wallpaper}')` }} />
+              {settings.wallpaperName || "Custom"}
+            </button>
+          )}
           {WALLPAPERS.map((w) => {
-            const sel = settings.wallpaperName === w.name;
+            const sel = !isCustom && settings.wallpaperName === w.name;
             return (
               <button
                 key={w.name}
@@ -133,6 +188,10 @@ function DesktopTab({ settings, updateSettings }: TabProps) {
               onChange={(v) => updateSettings({ wallpaperFit: v as XpSettings["wallpaperFit"] })}
               options={[{ value: "stretch", label: "Stretch" }, { value: "center", label: "Center" }, { value: "tile", label: "Tile" }]}
             />
+          </Field>
+          <Field label="Your own picture">
+            <input ref={fileRef} type="file" accept="image/*" onChange={onPick} style={{ display: "none" }} />
+            <DlgBtn onClick={() => fileRef.current?.click()}>Browse…</DlgBtn>
           </Field>
           {!settings.wallpaper && (
             <Field label="Color">
@@ -212,24 +271,33 @@ function Brightness({ settings, updateSettings }: TabProps) {
   );
 }
 
-function ThemesTab() {
+function ThemesTab({ settings, updateSettings }: TabProps) {
   return (
     <Group label="Theme">
-      <Select value="luna" onChange={() => {}} options={[{ value: "luna", label: "Windows XP" }, { value: "classic", label: "Windows Classic" }]} />
+      <Select
+        value={settings.theme}
+        onChange={(v) => updateSettings({ theme: v as XpSettings["theme"] })}
+        options={THEME_OPTIONS}
+      />
       <div style={{ fontSize: 11, color: "#666", marginTop: 8 }}>
-        To apply a wallpaper or screen saver, use the Desktop and Screen Saver tabs.
+        The colour scheme applies to the taskbar, Start menu and window title bars.
+        Use the Desktop and Screen Saver tabs for the wallpaper and screen saver.
       </div>
     </Group>
   );
 }
 
-function AppearanceTab() {
+function AppearanceTab({ settings, updateSettings }: TabProps) {
   return (
     <Group label="Windows and buttons">
       <Select value="luna" onChange={() => {}} options={[{ value: "luna", label: "Windows XP style" }, { value: "classic", label: "Windows Classic style" }]} />
-      <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
+      <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center" }}>
         <span>Color scheme:</span>
-        <Select value="blue" onChange={() => {}} options={[{ value: "blue", label: "Default (blue)" }, { value: "olive", label: "Olive Green" }, { value: "silver", label: "Silver" }]} />
+        <Select
+          value={settings.theme}
+          onChange={(v) => updateSettings({ theme: v as XpSettings["theme"] })}
+          options={THEME_OPTIONS}
+        />
       </div>
     </Group>
   );

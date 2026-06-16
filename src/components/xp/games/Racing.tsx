@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
+import { useDesktop } from "../DesktopContext";
+import { useGameSave, recordBest } from "../storage/gameStore";
 
 const W = 320, H = 480;
 const LANES = 4;
@@ -12,9 +14,11 @@ const ENEMY_COLORS = ["#f2c233", "#46a85a", "#9a59c4", "#e8853b", "#3b7fd1"];
 
 export default function Racing() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { notify } = useDesktop();
+  const { data } = useGameSave("racing");
+  const best = data.highScore ?? 0;
   const [state, setState] = useState<"ready" | "playing" | "over">("ready");
   const [distance, setDistance] = useState(0);
-  const [best, setBest] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const lane = useRef(1);
@@ -110,13 +114,14 @@ export default function Racing() {
       o.y += speed.current;
       const ox = o.lane * LANE_W + LANE_W / 2;
       if (Math.abs(ox - px) < CAR_W - 8 && Math.abs(o.y - py) < CAR_H - 12) {
-        setBest((b) => Math.max(b, Math.floor(distRef.current)));
+        const d = Math.floor(distRef.current);
+        if (recordBest("racing", "highScore", d)) notify("New record!", `Road Racer — ${d}m driven.`);
         setState("over");
         return;
       }
     }
     obstacles.current = obstacles.current.filter((o) => o.y < H + CAR_H);
-  }, []);
+  }, [notify]);
 
   useEffect(() => {
     const cv = canvasRef.current;

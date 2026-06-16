@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
+import { useDesktop } from "../DesktopContext";
+import { useGameSave, recordBest } from "../storage/gameStore";
 
 const CELLS = 20;
 const CELL = 17;
@@ -11,8 +13,10 @@ const eq = (a: Pt, b: Pt) => a.x === b.x && a.y === b.y;
 
 export default function Snake() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { notify } = useDesktop();
+  const { data } = useGameSave("snake");
+  const best = data.highScore ?? 0;
   const [score, setScore] = useState(0);
-  const [best, setBest] = useState(0);
   const [state, setState] = useState<"ready" | "playing" | "over" | "paused">("ready");
   const [focused, setFocused] = useState(false);
 
@@ -72,7 +76,7 @@ export default function Snake() {
     const nh = { x: head.x + dir.current.x, y: head.y + dir.current.y };
     if (nh.x < 0 || nh.y < 0 || nh.x >= CELLS || nh.y >= CELLS || snake.current.some((s) => eq(s, nh))) {
       setState("over");
-      setBest((b) => Math.max(b, score));
+      if (recordBest("snake", "highScore", score)) notify("New high score!", `Snake — ${score} point${score === 1 ? "" : "s"}.`);
       return;
     }
     snake.current.unshift(nh);
@@ -82,7 +86,7 @@ export default function Snake() {
     } else {
       snake.current.pop();
     }
-  }, [placeFood, score]);
+  }, [placeFood, score, notify]);
 
   // game loop
   useEffect(() => {

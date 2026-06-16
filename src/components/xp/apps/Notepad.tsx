@@ -1,44 +1,43 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useDesktop } from "../DesktopContext";
-import type { TextPayload } from "../types";
+import { useDocFile } from "./useDocFile";
+import SaveAsDialog from "./SaveAsDialog";
 
 const MENUS = ["File", "Edit", "Format", "View", "Help"];
 
 const DEFAULT_TEXT = `Welcome to Notepad.
 
-This is a fully working text editor — type anything you like.
+This is a fully working text editor — type anything you like,
+then File ▸ Save (or Ctrl+S) to keep it in My Documents.
 
 Tip: open .txt files from My Documents to read them here,
 and toggle Format ▸ Word Wrap below.`;
 
 export default function Notepad() {
-  const { payloads } = useDesktop();
-  const payload = payloads.notepad as TextPayload | undefined;
-
-  // Re-seed the editor when a new file is opened (payload identity changes).
-  const initial = payload?.content ?? DEFAULT_TEXT;
-  const [text, setText] = useState(initial);
-  const [seed, setSeed] = useState(initial);
-  if (payload && payload.content !== undefined && payload.content !== seed) {
-    setSeed(payload.content);
-    setText(payload.content);
-  }
-
+  const [text, setText] = useState(DEFAULT_TEXT);
   const [wrap, setWrap] = useState(true);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
-  const stats = useMemo(() => {
-    const lines = text.split("\n").length;
-    return { chars: text.length, lines };
-  }, [text]);
+  const doc = useDocFile({
+    docType: "text",
+    defaultContent: DEFAULT_TEXT,
+    untitled: "Untitled",
+    applyContent: setText,
+    getContent: () => text,
+  });
+
+  const stats = useMemo(() => ({ chars: text.length, lines: text.split("\n").length }), [text]);
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); doc.requestSave(); }
+  };
 
   return (
-    <div className="absolute inset-0 flex flex-col" style={{ background: "#fff", fontFamily: "Tahoma, 'Segoe UI', sans-serif" }}>
+    <div className="absolute inset-0 flex flex-col" style={{ background: "#fff", fontFamily: "Tahoma, 'Segoe UI', sans-serif" }} onKeyDown={onKeyDown}>
       {/* Menu bar */}
       <div
-        className="flex items-center shrink-0"
+        className="flex items-center shrink-0 relative"
         style={{ height: 21, background: "#ece9d8", borderBottom: "1px solid #d6d2c2", fontSize: 11, color: "#222" }}
         onMouseLeave={() => setOpenMenu(null)}
       >
@@ -53,6 +52,13 @@ export default function Notepad() {
             {m}
           </button>
         ))}
+        {openMenu === "File" && (
+          <div className="absolute" style={{ top: 21, left: 0, zIndex: 10, minWidth: 160, background: "#fff", border: "1px solid #8a8a8a", boxShadow: "2px 2px 8px rgba(0,0,0,0.3)", fontSize: 11 }}>
+            <MenuItem label="New" onClick={() => { doc.onNew(); setOpenMenu(null); }} />
+            <MenuItem label="Save" onClick={() => { doc.requestSave(); setOpenMenu(null); }} />
+            <MenuItem label="Save As…" onClick={() => { doc.onSaveAs(); setOpenMenu(null); }} />
+          </div>
+        )}
         {openMenu === "Format" && (
           <div className="absolute" style={{ top: 21, left: 64, zIndex: 10, minWidth: 150, background: "#fff", border: "1px solid #8a8a8a", boxShadow: "2px 2px 8px rgba(0,0,0,0.3)", fontSize: 11 }}>
             <button
@@ -93,6 +99,8 @@ export default function Notepad() {
         <span>Lines: {stats.lines}</span>
         <span>Chars: {stats.chars}</span>
       </div>
+
+      {doc.saveAsOpen && <SaveAsDialog initialName={doc.suggestedName.endsWith(".txt") ? doc.suggestedName : `${doc.suggestedName}.txt`} onSave={doc.commitSaveAs} onClose={doc.closeSaveAs} />}
     </div>
   );
 }

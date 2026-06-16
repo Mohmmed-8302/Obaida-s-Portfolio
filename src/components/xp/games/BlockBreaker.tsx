@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
+import { useDesktop } from "../DesktopContext";
+import { useGameSave, recordBest } from "../storage/gameStore";
 
 const W = 440, H = 460;
 const COLS = 8, ROWS = 5;
@@ -11,6 +13,9 @@ const ROW_COLORS = ["#e23b3b", "#f2a33b", "#f2d033", "#46a85a", "#3b7fd1"];
 
 export default function BlockBreaker() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { notify } = useDesktop();
+  const { data } = useGameSave("blockbreaker");
+  const best = data.highScore ?? 0;
   const [state, setState] = useState<"ready" | "playing" | "over" | "won" | "paused">("ready");
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
@@ -110,10 +115,13 @@ export default function BlockBreaker() {
     // ball lost
     if (b.y - BALL_R > H) {
       livesRef.current -= 1; setLives(livesRef.current);
-      if (livesRef.current <= 0) { setState("over"); }
+      if (livesRef.current <= 0) {
+        setState("over");
+        if (recordBest("blockbreaker", "highScore", scoreRef.current)) notify("New high score!", `Block Breaker — ${scoreRef.current} points.`);
+      }
       else resetBall();
     }
-  }, [resetBall]);
+  }, [resetBall, notify]);
 
   useEffect(() => {
     const cv = canvasRef.current;
@@ -146,6 +154,7 @@ export default function BlockBreaker() {
     <div ref={containerRef} tabIndex={0} onKeyDown={onKey} onMouseDown={() => containerRef.current?.focus()} className="absolute inset-0 flex flex-col items-center justify-center outline-none" style={{ fontFamily: "Tahoma, sans-serif", background: "#1a1f2b", padding: 10 }}>
       <div className="flex items-center justify-between mb-2" style={{ width: W, color: "#cfe0ff", fontSize: 12 }}>
         <span>Score: <b>{score}</b></span>
+        <span>High: <b>{best}</b></span>
         <span>Level: <b>{level}</b></span>
         <span>Lives: <b style={{ color: "#ff8a8a" }}>{"●".repeat(Math.max(0, lives))}</b></span>
       </div>

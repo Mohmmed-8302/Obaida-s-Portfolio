@@ -2,14 +2,41 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { AppId, AppPayload, Rect, WindowInstance, XpSettings } from "./xp/types";
+import type { AppId, AppPayload, Rect, WindowInstance, XpSettings, XpTheme } from "./xp/types";
 import { APPS } from "./xp/registry";
-import { DesktopContext, DEFAULT_SETTINGS } from "./xp/DesktopContext";
+import { DesktopContext, DEFAULT_SETTINGS, type XpNotice } from "./xp/DesktopContext";
+import { initCloudSync, registerHydrator, scheduleCloudPush } from "./xp/storage/cloudSync";
+import { seedDemoFiles } from "./xp/fileStore";
+import { play, setSoundConfig } from "./xp/storage/sound";
 import XPWindow from "./xp/XPWindow";
 import Taskbar, { TASKBAR_HEIGHT } from "./xp/Taskbar";
 import StartMenu from "./xp/StartMenu";
+import NotificationStack from "./xp/NotificationStack";
 import ScreenSaver from "./xp/ScreenSaver";
 import ShutdownDialog from "./ShutdownDialog";
+
+/** Luna colour schemes, exposed as CSS variables on the desktop root and read by
+ *  the taskbar, Start menu and window title bars. */
+const THEMES: Record<XpTheme, Record<string, string>> = {
+  blue: {
+    "--xp-taskbar": "linear-gradient(to bottom,#3168d5 0%,#3a7bea 8%,#2e6adf 40%,#2361dc 88%,#1d4fc4 100%)",
+    "--xp-tray": "linear-gradient(to bottom,#138ee0 0%,#1898e8 8%,#0f7ad6 50%,#0d6ec8 100%)",
+    "--xp-title": "linear-gradient(to bottom,#0A69F0 0%,#2E8DEF 8%,#0A60E0 40%,#0A53C8 88%,#0848B8 100%)",
+    "--xp-menu-header": "linear-gradient(to bottom,#1f60db 0%,#3f8af0 45%,#2870e6 55%,#13409e 100%)",
+  },
+  olive: {
+    "--xp-taskbar": "linear-gradient(to bottom,#8a9a5e 0%,#9aaa6c 8%,#788646 40%,#67753b 88%,#566231 100%)",
+    "--xp-tray": "linear-gradient(to bottom,#9bab6a 0%,#a7b675 8%,#7e8c4e 50%,#6e7c43 100%)",
+    "--xp-title": "linear-gradient(to bottom,#90a05f 0%,#a3b272 8%,#7f8f4c 40%,#6f7f42 88%,#63723a 100%)",
+    "--xp-menu-header": "linear-gradient(to bottom,#7f8f4c 0%,#a3b272 45%,#8a9a5b 55%,#5c6a37 100%)",
+  },
+  silver: {
+    "--xp-taskbar": "linear-gradient(to bottom,#9a9ab2 0%,#cdcde0 8%,#a7a7bd 40%,#9090a8 88%,#7e7e96 100%)",
+    "--xp-tray": "linear-gradient(to bottom,#c2c2d4 0%,#d6d6e4 8%,#ababc0 50%,#9c9cb2 100%)",
+    "--xp-title": "linear-gradient(to bottom,#b8b8cc 0%,#dcdcea 10%,#b4b4c8 50%,#9c9cb4 100%)",
+    "--xp-menu-header": "linear-gradient(to bottom,#a9a9c0 0%,#d2d2e2 45%,#b2b2c8 55%,#8e8ea6 100%)",
+  },
+};
 
 const SETTINGS_KEY = "xp.settings";
 const ICON_POS_KEY = "xp.iconPositions";
@@ -123,6 +150,8 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
   const [payloads, setPayloads] = useState<Partial<Record<AppId, AppPayload>>>({});
   const [settings, setSettings] = useState<XpSettings>(loadSettings);
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
+  const [notices, setNotices] = useState<XpNotice[]>([]);
+  const noticeId = useRef(1);
   const [iconPositions, setIconPositions] = useState<IconPositions>(() => {
     const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
     const vh = typeof window !== "undefined" ? window.innerHeight : 800;
@@ -140,8 +169,41 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
       if (typeof window !== "undefined") {
         try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(next)); } catch { /* ignore */ }
       }
+      scheduleCloudPush();
       return next;
     });
+  }, []);
+
+  const notify = useCallback((title: string, body: string, icon?: React.ReactNode) => {
+    const id = noticeId.current++;
+    setNotices((ns) => [...ns, { id, title, body, icon }]);
+    play("notify");
+    setTimeout(() => setNotices((ns) => ns.filter((n) => n.id !== id)), 6000);
+  }, []);
+
+  const dismissNotice = useCallback((id: number) => {
+    setNotices((ns) => ns.filter((n) => n.id !== id));
+  }, []);
+
+  const setDocTitle = useCallback((appId: AppId, name: string) => {
+    setWindows((ws) => ws.map((w) => (w.appId === appId ? { ...w, title: titleFor(APPS[appId].title, { kind: "doc", docType: "text", name }) } : w)));
+  }, []);
+
+  // Keep the sound engine in sync with mute/volume settings.
+  useEffect(() => { setSoundConfig({ muted: settings.muted, volume: settings.volume }); }, [settings.muted, settings.volume]);
+
+  // Cloud sync: hydrate from Blob if newer, then seed first-run demo docs.
+  useEffect(() => {
+    registerHydrator(SETTINGS_KEY, (raw) => {
+      try { setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(raw) }); } catch { /* ignore */ }
+    });
+    registerHydrator(ICON_POS_KEY, (raw) => {
+      try { setIconPositions(JSON.parse(raw)); } catch { /* ignore */ }
+    });
+    setSoundConfig({ muted: settings.muted, volume: settings.volume });
+    initCloudSync().finally(() => seedDemoFiles());
+    play("startup");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const focusWindow = useCallback((id: string) => {
@@ -177,6 +239,7 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
       const rect: Rect = { x, y, w, h };
       const inst: WindowInstance = { id, appId, title, minimized: false, maximized: false, rect, prevRect: rect, z: zCounter.current };
       setActiveId(id);
+      play("open");
       return [...ws, inst];
     });
   }, []);
@@ -243,6 +306,11 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
     });
   }, [activeId]);
 
+  const minimizeAll = useCallback(() => {
+    setWindows((ws) => ws.map((w) => ({ ...w, minimized: true })));
+    setActiveId(null);
+  }, []);
+
   const handleShutdown = useCallback(() => { setShowShutdown(false); onShutdown(); }, [onShutdown]);
 
   const onDesktopMouseDown = useCallback(() => { setStartOpen(false); setSelectedIcon(null); setCtxMenu(null); }, []);
@@ -253,11 +321,12 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
     setCtxMenu({ x: e.clientX, y: e.clientY });
   }, []);
 
-  const desktopApi = useMemo(() => ({ openApp, closeApp, payloads, settings, updateSettings }), [openApp, closeApp, payloads, settings, updateSettings]);
+  const desktopApi = useMemo(() => ({ openApp, closeApp, payloads, settings, updateSettings, notify, setDocTitle }), [openApp, closeApp, payloads, settings, updateSettings, notify, setDocTitle]);
 
   // Persist icon positions
   useEffect(() => {
     try { window.localStorage.setItem(ICON_POS_KEY, JSON.stringify(iconPositions)); } catch { /* ignore */ }
+    scheduleCloudPush();
   }, [iconPositions]);
 
   // Recompute icon positions when viewport resizes and current positions are invalid
@@ -319,6 +388,7 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
     <DesktopContext.Provider value={desktopApi}>
       <motion.div
         className="absolute inset-0 overflow-hidden"
+        style={THEMES[settings.theme] as React.CSSProperties}
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
         onMouseDown={onDesktopMouseDown}
         onContextMenu={onDesktopContextMenu}
@@ -379,9 +449,16 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
           windows={windows}
           activeId={activeId}
           startOpen={startOpen}
+          settings={settings}
+          updateSettings={updateSettings}
           onStartClick={() => setStartOpen((s) => !s)}
           onTaskClick={taskClick}
+          onOpenApp={openApp}
+          onShowDesktop={minimizeAll}
         />
+
+        {/* Tray balloon notifications */}
+        <NotificationStack notices={notices} onDismiss={dismissNotice} />
 
         {/* Shutdown dialog */}
         <AnimatePresence>

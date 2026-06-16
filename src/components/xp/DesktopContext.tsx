@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import type { AppId, AppPayload, XpSettings } from "./types";
 
 export const DEFAULT_SETTINGS: XpSettings = {
@@ -10,7 +10,18 @@ export const DEFAULT_SETTINGS: XpSettings = {
   bgColor: "#3a6ea5",
   brightness: 100,
   screensaver: { type: "bliss", waitMs: 60000 },
+  theme: "blue",
+  muted: false,
+  volume: 70,
 };
+
+/** A transient XP balloon notification shown above the system tray. */
+export interface XpNotice {
+  id: number;
+  title: string;
+  body: string;
+  icon?: ReactNode;
+}
 
 interface DesktopApi {
   /** Open (or focus) an app. An optional payload is stashed per-AppId and can
@@ -23,6 +34,10 @@ interface DesktopApi {
   settings: XpSettings;
   /** Shallow-merge a patch into settings (persisted to localStorage). */
   updateSettings: (patch: Partial<XpSettings>) => void;
+  /** Show a transient balloon notification near the system tray. */
+  notify: (title: string, body: string, icon?: ReactNode) => void;
+  /** Relabel an open app's window title with a document name (after Save As). */
+  setDocTitle: (appId: AppId, name: string) => void;
 }
 
 export const DesktopContext = createContext<DesktopApi>({
@@ -31,6 +46,8 @@ export const DesktopContext = createContext<DesktopApi>({
   payloads: {},
   settings: DEFAULT_SETTINGS,
   updateSettings: () => {},
+  notify: () => {},
+  setDocTitle: () => {},
 });
 
 export function useDesktop() {

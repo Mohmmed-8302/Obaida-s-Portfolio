@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
+import { useDesktop } from "../DesktopContext";
+import { useGameSave, recordBest } from "../storage/gameStore";
 
 const W = 320;
 const H = 460;
@@ -21,8 +23,10 @@ interface Pipe { x: number; gapY: number; passed: boolean; }
 export default function FlappyBird() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { notify } = useDesktop();
+  const { data } = useGameSave("flappybird");
+  const best = data.highScore ?? 0;
   const [score, setScore] = useState(0);
-  const [best, setBest] = useState(0);
   const [state, setState] = useState<"ready" | "playing" | "over">("ready");
 
   const bird = useRef({ y: PLAY_H / 2, v: 0 });
@@ -165,10 +169,10 @@ export default function FlappyBird() {
     }
     if (hitGround || hitCeil || hitPipe) {
       b.y = Math.min(b.y, PLAY_H - BIRD_R);
-      setBest((bs) => Math.max(bs, scoreRef.current));
+      if (recordBest("flappybird", "highScore", scoreRef.current)) notify("New high score!", `Flappy Bird — ${scoreRef.current} point${scoreRef.current === 1 ? "" : "s"}.`);
       setState("over");
     }
-  }, [spawnPipe]);
+  }, [spawnPipe, notify]);
 
   // main loop
   useEffect(() => {

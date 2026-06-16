@@ -39,7 +39,7 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
     >
       <div style={{ border: "1px solid #0831a8", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "4px 4px 18px rgba(0,0,0,0.5)" }}>
         {/* Header */}
-        <div className="flex items-center gap-3 px-4" style={{ height: 68, background: "linear-gradient(to bottom,#1f60db 0%,#3f8af0 45%,#2870e6 55%,#13409e 100%)", borderBottom: "2px solid #f5b840" }}>
+        <div className="flex items-center gap-3 px-4" style={{ height: 68, background: "var(--xp-menu-header, linear-gradient(to bottom,#1f60db 0%,#3f8af0 45%,#2870e6 55%,#13409e 100%))", borderBottom: "2px solid #f5b840" }}>
           <div style={{ width: 50, height: 50, borderRadius: "50%", overflow: "hidden", border: "3px solid rgba(255,255,255,0.9)", background: "linear-gradient(135deg,#c97a8a,#8a3e51)", display: "flex", alignItems: "flex-end", justifyContent: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.45)" }}>
             <svg width="42" height="38" viewBox="0 0 34 30"><circle cx="17" cy="11" r="7" fill="#fff" opacity="0.95" /><path d="M3 30 c0-9 7-13 14-13 s14 4 14 13z" fill="#fff" opacity="0.95" /></svg>
           </div>
@@ -93,7 +93,7 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
             <MenuRow icon={<MyComputerIcon size={24} />} label="My Computer" onClick={() => open("mycomputer")} right bold />
             <MenuRow icon={<FolderIcon size={24} />} label="Games" onClick={() => open("games")} right submenu />
             <DividerBlue />
-            <MenuRow icon={<ControlPanelIcon size={24} />} label="Control Panel" onClick={() => {}} right disabled />
+            <MenuRow icon={<ControlPanelIcon size={24} />} label="Control Panel" onClick={() => open("controlpanel")} right />
             <MenuRow icon={<RunIcon size={24} />} label="Run..." onClick={() => {}} right disabled />
             <DividerBlue />
             <MenuRow icon={<SearchIcon size={24} />} label="Search" onClick={() => {}} right disabled submenu />

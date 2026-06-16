@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { useDocFile } from "./useDocFile";
+import SaveAsDialog from "./SaveAsDialog";
 
 interface Slide { id: number; title: string; body: string; }
 
@@ -12,13 +14,36 @@ const INITIAL: Slide[] = [
   { id: 3, title: "Get in touch", body: "Double-click any text to edit this deck.\nAdd your own slides with “New Slide”." },
 ];
 
+const DEFAULT_CONTENT = JSON.stringify(INITIAL.map((s) => ({ title: s.title, body: s.body })));
+
 export default function PowerPoint() {
   const [slides, setSlides] = useState<Slide[]>(INITIAL);
   const [cur, setCur] = useState(0);
   const [show, setShow] = useState(false);
   const [nextId, setNextId] = useState(4);
 
+  const doc = useDocFile({
+    docType: "powerpoint",
+    defaultContent: DEFAULT_CONTENT,
+    untitled: "Presentation1",
+    applyContent: (c) => {
+      try {
+        const arr = JSON.parse(c) as { title?: string; body?: string }[];
+        if (Array.isArray(arr) && arr.length) {
+          setSlides(arr.map((s, i) => ({ id: i + 1, title: s.title ?? "", body: s.body ?? "" })));
+          setNextId(arr.length + 1);
+          setCur(0);
+        }
+      } catch { /* ignore */ }
+    },
+    getContent: () => JSON.stringify(slides.map((s) => ({ title: s.title, body: s.body }))),
+  });
+
   const slide = slides[cur] ?? slides[0];
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); doc.requestSave(); }
+  };
 
   const update = useCallback((patch: Partial<Slide>) => {
     setSlides((s) => s.map((sl, i) => (i === cur ? { ...sl, ...patch } : sl)));
@@ -52,9 +77,10 @@ export default function PowerPoint() {
   }, [show, slides.length]);
 
   return (
-    <div className="absolute inset-0 flex flex-col" style={{ background: "#ece9d8", fontFamily: "Tahoma, 'Segoe UI', sans-serif" }}>
+    <div className="absolute inset-0 flex flex-col" style={{ background: "#ece9d8", fontFamily: "Tahoma, 'Segoe UI', sans-serif" }} onKeyDown={onKeyDown}>
       {/* Toolbar */}
       <div className="flex items-center gap-2 shrink-0" style={{ height: 30, padding: "0 8px", background: "linear-gradient(to bottom,#f5f4ec,#e3ddc9)", borderBottom: "1px solid #b8b29c" }}>
+        <ToolButton onClick={doc.requestSave}>💾 Save</ToolButton>
         <ToolButton onClick={addSlide}>＋ New Slide</ToolButton>
         <ToolButton onClick={delSlide}>🗑 Delete</ToolButton>
         <div style={{ flex: 1 }} />
@@ -109,6 +135,8 @@ export default function PowerPoint() {
       <div className="shrink-0 flex items-center" style={{ height: 20, padding: "0 10px", background: "#ece9d8", borderTop: "1px solid #d6d2c2", fontSize: 11, color: "#444" }}>
         Slide {cur + 1} of {slides.length}
       </div>
+
+      {doc.saveAsOpen && <SaveAsDialog initialName={doc.suggestedName.endsWith(".ppt") ? doc.suggestedName : `${doc.suggestedName}.ppt`} onSave={doc.commitSaveAs} onClose={doc.closeSaveAs} />}
 
       {/* Slideshow overlay */}
       {show && (

@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState, useEffect, type ReactNode } from "react";
-import { useDesktop } from "../DesktopContext";
-import type { TextPayload } from "../types";
+import { useRef, useState, type ReactNode } from "react";
+import { useDocFile } from "./useDocFile";
+import EditorMenuBar from "./EditorMenuBar";
+import SaveAsDialog from "./SaveAsDialog";
 
 const MENUS = ["File", "Edit", "View", "Insert", "Format", "Tools", "Table", "Help"];
 
@@ -10,45 +11,39 @@ const DEFAULT_HTML = `<h1 style="font-size:22px;color:#1f3864;margin-bottom:10px
 <p style="margin-bottom:8px;"><b>Motion Designer &amp; Creative Developer</b></p>
 <p style="margin-bottom:8px;">This is a working word processor. Select text and use the toolbar to make it
 <b>bold</b>, <i>italic</i> or <u>underlined</u>, change the font size, colour and alignment.</p>
-<p>Open <i>resume.doc</i> from My Documents to edit it here.</p>`;
+<p>Open <i>resume.doc</i> from My Documents to edit it here, then File ▸ Save.</p>`;
 
 export default function Word() {
-  const { payloads } = useDesktop();
-  const payload = payloads.word as TextPayload | undefined;
   const ref = useRef<HTMLDivElement>(null);
   const [font, setFont] = useState("Times New Roman");
   const [size, setSize] = useState("3");
 
-  // Load default / opened-document content once on mount and whenever a new file arrives.
-  const seed = payload?.content;
-  const lastSeed = useRef<string | undefined>("__init__");
-  useEffect(() => {
-    if (!ref.current) return;
-    if (lastSeed.current === "__init__") {
-      ref.current.innerHTML = seed ?? DEFAULT_HTML;
-      lastSeed.current = seed;
-    } else if (seed !== undefined && seed !== lastSeed.current) {
-      ref.current.innerHTML = seed;
-      lastSeed.current = seed;
-    }
-  }, [seed]);
+  const doc = useDocFile({
+    docType: "word",
+    defaultContent: DEFAULT_HTML,
+    untitled: "Document1",
+    applyContent: (c) => { if (ref.current) ref.current.innerHTML = c; },
+    getContent: () => ref.current?.innerHTML ?? "",
+  });
 
   const exec = (cmd: string, val?: string) => {
     ref.current?.focus();
     document.execCommand(cmd, false, val);
   };
 
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); doc.requestSave(); }
+  };
+
   return (
-    <div className="absolute inset-0 flex flex-col" style={{ background: "#fff", fontFamily: "Tahoma, 'Segoe UI', sans-serif" }}>
+    <div className="absolute inset-0 flex flex-col" style={{ background: "#fff", fontFamily: "Tahoma, 'Segoe UI', sans-serif" }} onKeyDown={onKeyDown}>
       {/* Menu bar */}
-      <div className="flex items-center shrink-0" style={{ height: 21, background: "#ece9d8", borderBottom: "1px solid #d6d2c2", fontSize: 11, color: "#222" }}>
-        {MENUS.map((m) => (
-          <span key={m} style={{ padding: "0 7px", cursor: "default", lineHeight: "21px" }}>{m}</span>
-        ))}
-      </div>
+      <EditorMenuBar menus={MENUS} onNew={doc.onNew} onSave={doc.requestSave} onSaveAs={doc.onSaveAs} />
 
       {/* Toolbar */}
       <div className="flex items-center gap-1 shrink-0 flex-wrap" style={{ minHeight: 30, padding: "3px 6px", background: "linear-gradient(to bottom,#f5f4ec,#e3ddc9)", borderBottom: "1px solid #b8b29c" }}>
+        <SaveBtn onClick={doc.requestSave} />
+        <Sep />
         <select value={font} onChange={(e) => { setFont(e.target.value); exec("fontName", e.target.value); }}
           style={selStyle(116)}>
           {["Times New Roman", "Arial", "Tahoma", "Georgia", "Courier New", "Verdana"].map((f) => <option key={f} value={f}>{f}</option>)}
@@ -91,7 +86,20 @@ export default function Word() {
           }}
         />
       </div>
+
+      {doc.saveAsOpen && <SaveAsDialog initialName={doc.suggestedName.endsWith(".doc") ? doc.suggestedName : `${doc.suggestedName}.doc`} onSave={doc.commitSaveAs} onClose={doc.closeSaveAs} />}
     </div>
+  );
+}
+
+function SaveBtn({ onClick }: { onClick: () => void }) {
+  return (
+    <button title="Save" onMouseDown={(e) => e.preventDefault()} onClick={onClick}
+      className="flex items-center justify-center"
+      style={{ width: 24, height: 22, fontSize: 14, border: "1px solid transparent", borderRadius: 3, background: "transparent", cursor: "pointer" }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = "#fce9b0"; e.currentTarget.style.border = "1px solid #e3b94e"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; }}
+    >💾</button>
   );
 }
 

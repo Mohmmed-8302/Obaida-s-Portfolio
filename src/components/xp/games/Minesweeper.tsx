@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useDesktop } from "../DesktopContext";
+import { useGameSave, recordBest } from "../storage/gameStore";
 
 interface Cell { mine: boolean; revealed: boolean; flagged: boolean; count: number; }
 type Diff = "beginner" | "intermediate" | "expert";
@@ -17,8 +19,11 @@ function makeGrid(r: number, c: number): Cell[][] {
 }
 
 export default function Minesweeper() {
+  const { notify } = useDesktop();
+  const { data } = useGameSave("minesweeper");
   const [diff, setDiff] = useState<Diff>("beginner");
   const cfg = CONFIG[diff];
+  const bestTime = data[`best_${diff}`];
   const [grid, setGrid] = useState<Cell[][]>(() => makeGrid(cfg.r, cfg.c));
   const [started, setStarted] = useState(false);
   const [dead, setDead] = useState(false);
@@ -27,11 +32,12 @@ export default function Minesweeper() {
   const [time, setTime] = useState(0);
   const [pressing, setPressing] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeRef = useRef(0);
 
   const reset = useCallback((d: Diff = diff) => {
     const c = CONFIG[d];
     setGrid(makeGrid(c.r, c.c));
-    setStarted(false); setDead(false); setWon(false); setFlags(0); setTime(0);
+    setStarted(false); setDead(false); setWon(false); setFlags(0); setTime(0); timeRef.current = 0;
     if (timer.current) { clearInterval(timer.current); timer.current = null; }
   }, [diff]);
 
@@ -40,7 +46,7 @@ export default function Minesweeper() {
 
   const startTimer = useCallback(() => {
     if (timer.current) return;
-    timer.current = setInterval(() => setTime((t) => Math.min(t + 1, 999)), 1000);
+    timer.current = setInterval(() => setTime((t) => { const nt = Math.min(t + 1, 999); timeRef.current = nt; return nt; }), 1000);
   }, []);
   const stopTimer = useCallback(() => { if (timer.current) { clearInterval(timer.current); timer.current = null; } }, []);
 
@@ -106,9 +112,10 @@ export default function Minesweeper() {
       setWon(true); stopTimer();
       for (const row of g) for (const cell of row) if (cell.mine) cell.flagged = true;
       setFlags(cfg.m);
+      if (recordBest("minesweeper", `best_${diff}`, timeRef.current, false)) notify("New best time!", `Minesweeper (${diff}) — ${timeRef.current}s.`);
     }
     setGrid(g);
-  }, [dead, won, grid, started, plant, floodReveal, checkWin, startTimer, stopTimer, cfg.m]);
+  }, [dead, won, grid, started, plant, floodReveal, checkWin, startTimer, stopTimer, cfg.m, diff, notify]);
 
   const flag = useCallback((e: React.MouseEvent, y: number, x: number) => {
     e.preventDefault();
@@ -156,6 +163,7 @@ export default function Minesweeper() {
 
       <div className="mt-2" style={{ fontSize: 11, color: "#333" }}>
         {won ? "You cleared the minefield! 😎" : dead ? "Boom! Click the face to retry." : "Left-click reveal · Right-click flag"}
+        {bestTime !== undefined && <span style={{ marginLeft: 8, color: "#555" }}>· Best ({diff}): <b>{bestTime}s</b></span>}
       </div>
     </div>
   );

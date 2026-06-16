@@ -96,7 +96,7 @@ export default function XPWindow({
   useEffect(() => () => { dragData.current = null; resizeData.current = null; }, []);
 
   const titleGradient = active
-    ? "linear-gradient(to bottom, #0A69F0 0%, #2E8DEF 8%, #0A60E0 40%, #0A53C8 88%, #0848B8 100%)"
+    ? "var(--xp-title, linear-gradient(to bottom, #0A69F0 0%, #2E8DEF 8%, #0A60E0 40%, #0A53C8 88%, #0848B8 100%))"
     : "linear-gradient(to bottom, #7AA7E8 0%, #9CBEEE 10%, #7FA8E0 50%, #6E97D6 100%)";
 
   return (

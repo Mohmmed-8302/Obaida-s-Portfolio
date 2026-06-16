@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useDocFile } from "./useDocFile";
+import EditorMenuBar from "./EditorMenuBar";
+import SaveAsDialog from "./SaveAsDialog";
 
 const COLS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 const ROWS = 24;
@@ -70,9 +73,21 @@ export default function Excel() {
   const [cells, setCells] = useState<Record<string, string>>(SEED);
   const [active, setActive] = useState("A1");
 
+  const doc = useDocFile({
+    docType: "excel",
+    defaultContent: JSON.stringify(SEED),
+    untitled: "Book1",
+    applyContent: (c) => { try { setCells(JSON.parse(c) || {}); } catch { setCells({}); } },
+    getContent: () => JSON.stringify(cells),
+  });
+
   const setActiveValue = useCallback((val: string) => {
     setCells((c) => ({ ...c, [active]: val }));
   }, [active]);
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); doc.requestSave(); }
+  };
 
   const move = useCallback((dr: number, dc: number) => {
     const col = COLS.indexOf(active[0]);
@@ -83,14 +98,13 @@ export default function Excel() {
   }, [active]);
 
   return (
-    <div className="absolute inset-0 flex flex-col" style={{ background: "#fff", fontFamily: "Tahoma, 'Segoe UI', sans-serif" }}>
+    <div className="absolute inset-0 flex flex-col" style={{ background: "#fff", fontFamily: "Tahoma, 'Segoe UI', sans-serif" }} onKeyDown={onKeyDown}>
       {/* Menu bar */}
-      <div className="flex items-center shrink-0" style={{ height: 21, background: "#ece9d8", borderBottom: "1px solid #d6d2c2", fontSize: 11, color: "#222" }}>
-        {MENUS.map((m) => <span key={m} style={{ padding: "0 7px", lineHeight: "21px", cursor: "default" }}>{m}</span>)}
-      </div>
+      <EditorMenuBar menus={MENUS} onNew={doc.onNew} onSave={doc.requestSave} onSaveAs={doc.onSaveAs} />
 
       {/* Formula bar */}
       <div className="flex items-center gap-1 shrink-0" style={{ height: 24, padding: "0 4px", background: "#f3f1e7", borderBottom: "1px solid #cfc9b4" }}>
+        <button title="Save" onClick={doc.requestSave} style={{ width: 22, height: 18, fontSize: 13, border: "1px solid #b8b29c", borderRadius: 3, background: "linear-gradient(to bottom,#fff,#e7e2d2)", cursor: "pointer" }}>💾</button>
         <div className="flex items-center justify-center" style={{ width: 46, height: 18, background: "#fff", border: "1px solid #9a958a", fontSize: 11, fontWeight: 700, color: "#1d7045" }}>{active}</div>
         <span style={{ color: "#1d7045", fontStyle: "italic", fontWeight: 700, padding: "0 4px" }}>fx</span>
         <input
@@ -162,6 +176,8 @@ export default function Excel() {
         <span style={{ opacity: 0.7 }}>Sheet3</span>
         <span className="ml-auto" style={{ opacity: 0.7 }}>Ready</span>
       </div>
+
+      {doc.saveAsOpen && <SaveAsDialog initialName={doc.suggestedName.endsWith(".xls") ? doc.suggestedName : `${doc.suggestedName}.xls`} onSave={doc.commitSaveAs} onClose={doc.closeSaveAs} />}
     </div>
   );
 }

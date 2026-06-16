@@ -47,7 +47,17 @@ export interface DocPayload {
   name?: string;
   content?: string;
 }
-export type AppPayload = PhotoPayload | TextPayload | DocPayload;
+/** Handed to Internet Explorer to navigate somewhere. `url` is either the
+ *  sentinel "portfolio" (render the real Portfolio) or an external https URL. */
+export interface SitePayload {
+  kind: "site";
+  url: string;
+  name?: string;
+}
+export type AppPayload = PhotoPayload | TextPayload | DocPayload | SitePayload;
+
+/** Luna colour scheme applied to the taskbar, Start menu and title bars. */
+export type XpTheme = "blue" | "olive" | "silver";
 
 /** Persisted desktop appearance settings (localStorage key `xp.settings`). */
 export interface XpSettings {
@@ -60,6 +70,11 @@ export interface XpSettings {
   /** 0..100, where 100 = no dimming. */
   brightness: number;
   screensaver: { type: "none" | "starfield" | "mystify" | "bliss"; waitMs: number };
+  /** Luna colour scheme. */
+  theme: XpTheme;
+  /** UI sound effects on/off and master volume (0..100). */
+  muted: boolean;
+  volume: number;
 }
 
 export interface Rect {
