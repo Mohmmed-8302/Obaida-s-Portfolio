@@ -56,13 +56,7 @@ export default function CRTMonitor({ onPower, powered, children }: CRTMonitorPro
       {/* Scene: monitor + keyboard + mouse, centered and scaled to fit */}
       <div className="absolute left-1/2 top-1/2" style={{ transform: `translate(-50%, -50%) scale(${scale})`, width: SCENE_W, height: SCENE_H }}>
         {/* ── Mouse (right of keyboard, on the desk) ── */}
-        <div className="absolute" style={{ left: 580, top: 535, width: 76, height: 116, zIndex: 1 }}>
-          {/* cable */}
-          <div className="absolute" style={{
-            left: -30, top: 8, width: 60, height: 40,
-            borderLeft: "3px solid #7a7256", borderTop: "3px solid #7a7256",
-            borderTopLeftRadius: 30,
-          }} />
+        <div className="absolute" style={{ left: 555, top: 545, width: 76, height: 100, zIndex: 1 }}>
           <div className="absolute inset-0" style={{
             background: "linear-gradient(150deg, #e6dcbb 0%, #cabf95 55%, #a89d76 100%)",
             borderRadius: "38px 38px 30px 30px",
