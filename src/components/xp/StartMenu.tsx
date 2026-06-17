@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 import type { AppId } from "./types";
 import { APPS } from "./registry";
 import {
-  MyComputerIcon, MyDocumentsIcon, ControlPanelIcon, HelpIcon, SearchIcon, RunIcon,
-  TurnOffIcon, LogOffIcon, FolderIcon,
+  HelpIcon, SearchIcon, RunIcon,
+  TurnOffIcon, LogOffIcon,
 } from "./icons";
 
 interface StartMenuProps {
@@ -15,12 +15,8 @@ interface StartMenuProps {
   onShutdown: () => void;
 }
 
-const PINNED: AppId[] = ["ie", "word", "excel", "powerpoint"];
-const FREQUENT: AppId[] = ["notepad", "paint", "photoviewer", "flappybird"];
-const ALL_OFFICE: AppId[] = ["word", "excel", "powerpoint"];
-const ALL_ACCESSORIES: AppId[] = ["notepad", "paint", "photoviewer"];
-const ALL_GAMES: AppId[] = ["tictactoe", "minesweeper", "solitaire", "snake", "chess", "blockbreaker", "racing", "flappybird"];
-const ALL_PROGRAMS: AppId[] = ["ie", "mycomputer", "mydocuments"];
+const PINNED: AppId[] = ["ie"];
+const FREQUENT: AppId[] = [];
 
 export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuProps) {
   const [showAll, setShowAll] = useState(false);
@@ -51,8 +47,6 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
           {/* Left pane */}
           <div className="relative" style={{ width: 196, background: "#fff", padding: "6px 0", display: "flex", flexDirection: "column" }}>
             {PINNED.map((id) => <MenuRow key={id} icon={APPS[id].icon(26)} label={shortTitle(id)} onClick={() => open(id)} bold arrow />)}
-            <Divider />
-            {FREQUENT.map((id) => <MenuRow key={id} icon={APPS[id].icon(26)} label={shortTitle(id)} small onClick={() => open(id)} arrow />)}
             <div style={{ flex: 1 }} />
             <Divider />
             {/* All Programs */}
@@ -73,27 +67,13 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
                 style={{ left: 188, bottom: 0, width: 200, maxHeight: 470, overflowY: "auto", background: "#fff", border: "1px solid #8a8a8a", boxShadow: "3px 3px 10px rgba(0,0,0,0.35)", padding: "4px 0", zIndex: 5 }}
                 onMouseLeave={() => setShowAll(false)}
               >
-                <FlyHeader>Microsoft Office</FlyHeader>
-                {ALL_OFFICE.map((id) => <MenuRow key={id} icon={APPS[id].icon(22)} label={shortTitle(id)} small onClick={() => open(id)} />)}
-                <Divider />
-                <FlyHeader>Accessories</FlyHeader>
-                {ALL_ACCESSORIES.map((id) => <MenuRow key={id} icon={APPS[id].icon(22)} label={shortTitle(id)} small onClick={() => open(id)} />)}
-                <Divider />
-                <FlyHeader>Games</FlyHeader>
-                {ALL_GAMES.map((id) => <MenuRow key={id} icon={APPS[id].icon(22)} label={APPS[id].title} small onClick={() => open(id)} />)}
-                <Divider />
-                {ALL_PROGRAMS.map((id) => <MenuRow key={id} icon={APPS[id].icon(22)} label={shortTitle(id)} small onClick={() => open(id)} />)}
+                <MenuRow icon={APPS.ie.icon(22)} label={shortTitle("ie")} small onClick={() => open("ie")} />
               </div>
             )}
           </div>
 
           {/* Right pane */}
           <div style={{ width: 184, background: "linear-gradient(to bottom,#d3e5fa,#cfe0f7)", padding: "8px 0", borderLeft: "1px solid #b5cbe8" }}>
-            <MenuRow icon={<MyDocumentsIcon size={24} />} label="My Documents" onClick={() => open("mydocuments")} right bold />
-            <MenuRow icon={<MyComputerIcon size={24} />} label="My Computer" onClick={() => open("mycomputer")} right bold />
-            <MenuRow icon={<FolderIcon size={24} />} label="Games" onClick={() => open("games")} right submenu />
-            <DividerBlue />
-            <MenuRow icon={<ControlPanelIcon size={24} />} label="Control Panel" onClick={() => open("controlpanel")} right />
             <MenuRow icon={<RunIcon size={24} />} label="Run..." onClick={() => {}} right disabled />
             <DividerBlue />
             <MenuRow icon={<SearchIcon size={24} />} label="Search" onClick={() => {}} right disabled submenu />
