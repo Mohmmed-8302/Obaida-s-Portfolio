@@ -9,7 +9,7 @@ export const DEFAULT_SETTINGS: XpSettings = {
   wallpaperFit: "stretch",
   bgColor: "#3a6ea5",
   brightness: 100,
-  screensaver: { type: "bliss", waitMs: 60000 },
+  screensaver: { type: "none", waitMs: 60000 },
   theme: "blue",
   muted: false,
   volume: 70,
