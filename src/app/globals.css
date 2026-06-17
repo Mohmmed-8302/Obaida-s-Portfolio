@@ -113,6 +113,9 @@ body {
   100% { top: 120%; }
 }
 
+/* ─── CRT desk peripherals (identity classes for targeting) ─── */
+.crt-mouse, .crt-keyboard { pointer-events: auto; }
+
 /* ─── Portfolio responsive container queries ─── */
 
 .portfolio-root .section-inner { max-width: 100%; }

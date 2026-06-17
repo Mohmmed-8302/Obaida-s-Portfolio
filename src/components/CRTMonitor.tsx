@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 const SCENE_W = 660;
@@ -36,7 +36,6 @@ interface CRTMonitorProps {
  */
 export default function CRTMonitor({ onPower, powered, children }: CRTMonitorProps) {
   const scale = useFitScale();
-  const sceneRef = useRef<HTMLDivElement>(null);
   return (
     <div className="relative w-full h-full overflow-hidden" style={{ background: "radial-gradient(ellipse at 50% 35%, #20242e 0%, #0a0a0c 75%)" }}>
       {/* Wooden desk */}
@@ -55,26 +54,17 @@ export default function CRTMonitor({ onPower, powered, children }: CRTMonitorPro
       </div>
 
       {/* Scene: monitor + keyboard + mouse, centered and scaled to fit */}
-      <div ref={sceneRef} className="absolute left-1/2 top-1/2" style={{ transform: `translate(-50%, -50%) scale(${scale})`, width: SCENE_W, height: SCENE_H }}>
-        {/* ── Mouse (right of keyboard, on the desk) ── */}
-        <motion.div
-          drag
-          dragConstraints={sceneRef}
-          dragElastic={0}
-          dragMomentum={false}
-          className="absolute"
-          style={{ left: 565, top: 555, width: 76, height: 100, zIndex: 3, cursor: "grab" }}
-          whileDrag={{ cursor: "grabbing", scale: 1.05 }}
-        >
+      <div className="absolute left-1/2 top-1/2" style={{ transform: `translate(-50%, -50%) scale(${scale})`, width: SCENE_W, height: SCENE_H }}>
+        {/* ── Mouse ── */}
+        <div className="crt-mouse absolute" style={{ left: 575, top: 530, width: 76, height: 100, zIndex: 1 }}>
           <div className="absolute inset-0" style={{
             background: "linear-gradient(150deg, #e6dcbb 0%, #cabf95 55%, #a89d76 100%)",
             borderRadius: "38px 38px 30px 30px",
             boxShadow: "inset -3px -3px 0 #8f8460, inset 3px 3px 0 #f2ead0, 3px 4px 0 rgba(0,0,0,0.35)",
           }} />
-          {/* buttons */}
           <div className="absolute" style={{ left: "50%", top: 6, width: 2, height: 34, background: "#9b906c", transform: "translateX(-50%)" }} />
           <div className="absolute" style={{ left: 14, top: 26, width: 48, height: 8, background: "#b6ab83", borderRadius: 4 }} />
-        </motion.div>
+        </div>
 
         {/* ── Monitor ── */}
         <div className="absolute left-1/2" style={{ top: 0, transform: "translateX(-50%)", width: 520, height: 470 }}>
@@ -202,46 +192,36 @@ export default function CRTMonitor({ onPower, powered, children }: CRTMonitorPro
         </div>
 
         {/* ── Keyboard ── */}
-        <motion.div
-          drag
-          dragConstraints={sceneRef}
-          dragElastic={0}
-          dragMomentum={false}
-          className="absolute"
-          style={{ left: 95, top: 500, width: 470, height: 150, zIndex: 2, cursor: "grab" }}
-          whileDrag={{ cursor: "grabbing" }}
-        >
-          <div style={{ transform: "perspective(700px) rotateX(34deg)", width: "100%", height: "100%" }}>
-            <div className="absolute inset-0" style={{
-              borderRadius: 12,
-              background: "linear-gradient(180deg, #ddd3aa 0%, #c2b78d 60%, #a89d76 100%)",
-              boxShadow: "inset -5px -5px 0 #8f8460, inset 5px 5px 0 #f2ead0, 0 12px 18px rgba(0,0,0,0.45)",
-              padding: 14,
-              imageRendering: "pixelated",
-            }}>
-              {/* key rows */}
-              <div className="flex flex-col gap-[6px] h-full">
-                {[14, 13, 12, 11].map((n, row) => (
-                  <div key={row} className="flex gap-[5px] flex-1">
-                    {Array.from({ length: n }).map((_, i) => (
-                      <div key={i} className="flex-1" style={{
-                        background: "linear-gradient(180deg, #efe7c8, #cfc49b)",
-                        borderRadius: 3,
-                        boxShadow: "inset -2px -2px 0 #a89d76, inset 1px 1px 0 #fffdf2",
-                      }} />
-                    ))}
-                  </div>
-                ))}
-                {/* spacebar row */}
-                <div className="flex gap-[5px] flex-1">
-                  <div style={{ width: "18%", background: "linear-gradient(180deg, #efe7c8, #cfc49b)", borderRadius: 3, boxShadow: "inset -2px -2px 0 #a89d76, inset 1px 1px 0 #fffdf2" }} />
-                  <div className="flex-1" style={{ background: "linear-gradient(180deg, #efe7c8, #cfc49b)", borderRadius: 3, boxShadow: "inset -2px -2px 0 #a89d76, inset 1px 1px 0 #fffdf2" }} />
-                  <div style={{ width: "18%", background: "linear-gradient(180deg, #efe7c8, #cfc49b)", borderRadius: 3, boxShadow: "inset -2px -2px 0 #a89d76, inset 1px 1px 0 #fffdf2" }} />
+        <div className="crt-keyboard absolute" style={{ left: 80, top: 510, width: 470, height: 150, zIndex: 2, transform: "perspective(700px) rotateX(34deg)" }}>
+          <div className="absolute inset-0" style={{
+            borderRadius: 12,
+            background: "linear-gradient(180deg, #ddd3aa 0%, #c2b78d 60%, #a89d76 100%)",
+            boxShadow: "inset -5px -5px 0 #8f8460, inset 5px 5px 0 #f2ead0, 0 12px 18px rgba(0,0,0,0.45)",
+            padding: 14,
+            imageRendering: "pixelated",
+          }}>
+            {/* key rows */}
+            <div className="flex flex-col gap-[6px] h-full">
+              {[14, 13, 12, 11].map((n, row) => (
+                <div key={row} className="flex gap-[5px] flex-1">
+                  {Array.from({ length: n }).map((_, i) => (
+                    <div key={i} className="flex-1" style={{
+                      background: "linear-gradient(180deg, #efe7c8, #cfc49b)",
+                      borderRadius: 3,
+                      boxShadow: "inset -2px -2px 0 #a89d76, inset 1px 1px 0 #fffdf2",
+                    }} />
+                  ))}
                 </div>
+              ))}
+              {/* spacebar row */}
+              <div className="flex gap-[5px] flex-1">
+                <div style={{ width: "18%", background: "linear-gradient(180deg, #efe7c8, #cfc49b)", borderRadius: 3, boxShadow: "inset -2px -2px 0 #a89d76, inset 1px 1px 0 #fffdf2" }} />
+                <div className="flex-1" style={{ background: "linear-gradient(180deg, #efe7c8, #cfc49b)", borderRadius: 3, boxShadow: "inset -2px -2px 0 #a89d76, inset 1px 1px 0 #fffdf2" }} />
+                <div style={{ width: "18%", background: "linear-gradient(180deg, #efe7c8, #cfc49b)", borderRadius: 3, boxShadow: "inset -2px -2px 0 #a89d76, inset 1px 1px 0 #fffdf2" }} />
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Global pixel grid over the whole scene */}
