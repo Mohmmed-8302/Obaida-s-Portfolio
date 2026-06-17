@@ -321,8 +321,8 @@ function AboutSection() {
 
 function StorySection() {
   const events = [
-    { year: "2024", title: "Started Learning", desc: "Self-taught video editing journey begins. Discovered the power of short-form content." },
-    { year: "2025", title: "First Publish", desc: "Released first professional edits to the world. Built a growing portfolio of viral-ready clips." },
+    { year: "2022", title: "Started Learning", desc: "Self-taught video editing journey begins. Discovered the power of short-form content." },
+    { year: "2024", title: "First Publish", desc: "Released first professional edits to the world. Built a growing portfolio of viral-ready clips." },
     { year: "2026", title: "The Breakthrough", desc: "Content went viral. Portfolio design services launched. No looking back." },
   ];
   return (
