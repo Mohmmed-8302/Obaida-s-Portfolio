@@ -447,23 +447,126 @@ function ContactSection() {
         </Reveal>
         <Reveal delay={350}>
           <RetroCard title="thank_you.letter" className="h-full">
-            <div className="flex flex-col items-center text-center" style={{ padding: "20px 12px", gap: 16 }}>
-              <div style={{ fontSize: 30, color: "var(--color-dusty-rose)" }}>&#9829;</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: "var(--color-dusty-rose)", fontFamily: "var(--font-display)", letterSpacing: "0.02em" }}>Thank You for Choosing Us</div>
-              <p style={{ fontSize: 13, lineHeight: 1.8, color: "var(--color-storm)", maxWidth: 340 }}>
-                Your trust means the world to us. Every project we take on is more than just work — it&apos;s a commitment to bringing your vision to life with passion and precision.
-              </p>
-              <p style={{ fontSize: 13, lineHeight: 1.8, color: "var(--color-storm)", maxWidth: 340 }}>
-                We look forward to creating something remarkable together. Your success is our greatest reward.
-              </p>
-              <div style={{ width: 40, height: 1, background: "var(--color-dusty-rose)", opacity: 0.4, margin: "4px 0" }} />
-              <div style={{ fontSize: 13, fontFamily: "var(--font-display)", color: "var(--color-storm)", fontStyle: "italic" }}>With gratitude,</div>
-              <div style={{ fontSize: 14, fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--color-dusty-rose)" }}>— Obaida</div>
-            </div>
+            <ThankYouMail />
           </RetroCard>
         </Reveal>
       </div>
     </Section>
+  );
+}
+
+function ThankYouMail() {
+  const [phase, setPhase] = useState<"closed" | "opening" | "open">("closed");
+
+  const handleClick = () => {
+    if (phase !== "closed") return;
+    setPhase("opening");
+    setTimeout(() => setPhase("open"), 600);
+  };
+
+  return (
+    <div className="flex flex-col items-center text-center" style={{ padding: "24px 12px", gap: 16, minHeight: 220 }}>
+      <div style={{ fontSize: 20, fontWeight: 700, color: "var(--color-dusty-rose)", fontFamily: "var(--font-display)", letterSpacing: "0.02em" }}>
+        Thank You for Choosing Us
+      </div>
+
+      {phase === "closed" && (
+        <button
+          onClick={handleClick}
+          style={{
+            background: "none", border: "none", cursor: "pointer",
+            padding: 16, transition: "transform 0.2s",
+            imageRendering: "pixelated",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.08)"; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; }}
+        >
+          {/* Pixelated mail envelope icon */}
+          <svg width="80" height="64" viewBox="0 0 80 64" style={{ imageRendering: "pixelated" }}>
+            {/* envelope body */}
+            <rect x="4" y="16" width="72" height="44" rx="2" fill="#d4cfe8" stroke="#6366a0" strokeWidth="3" />
+            {/* envelope shadow */}
+            <rect x="4" y="52" width="72" height="8" rx="1" fill="#b8b3d0" />
+            {/* envelope flap */}
+            <polygon points="4,16 40,40 76,16" fill="#e8e4f4" stroke="#6366a0" strokeWidth="3" strokeLinejoin="round" />
+            {/* stamp */}
+            <rect x="56" y="22" width="14" height="12" fill="#f4a261" stroke="#e76f51" strokeWidth="2" rx="1" />
+            <rect x="59" y="25" width="8" height="6" fill="#e76f51" rx="1" />
+            {/* lines on envelope */}
+            <line x1="12" y1="36" x2="36" y2="36" stroke="#9b97b8" strokeWidth="2" />
+            <line x1="12" y1="42" x2="32" y2="42" stroke="#9b97b8" strokeWidth="2" />
+            <line x1="12" y1="48" x2="28" y2="48" stroke="#9b97b8" strokeWidth="2" />
+            {/* blue arrow swoop (like Outlook Express) */}
+            <path d="M62,0 Q78,8 68,24" fill="none" stroke="#3b82f6" strokeWidth="4" strokeLinecap="round" />
+            <polygon points="65,22 72,26 68,17" fill="#3b82f6" />
+            <path d="M18,64 Q2,56 12,40" fill="none" stroke="#3b82f6" strokeWidth="4" strokeLinecap="round" />
+            <polygon points="15,42 8,38 12,47" fill="#3b82f6" />
+          </svg>
+          <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--color-storm-lighter)", marginTop: 8 }}>
+            Click to open
+          </div>
+        </button>
+      )}
+
+      {phase === "opening" && (
+        <div style={{
+          width: 80, height: 64, position: "relative",
+          animation: "mailOpen 0.6s ease-out forwards",
+        }}>
+          <svg width="80" height="64" viewBox="0 0 80 64" style={{ imageRendering: "pixelated" }}>
+            <rect x="4" y="16" width="72" height="44" rx="2" fill="#d4cfe8" stroke="#6366a0" strokeWidth="3" />
+            <rect x="4" y="52" width="72" height="8" rx="1" fill="#b8b3d0" />
+            <polygon points="4,16 40,40 76,16" fill="#e8e4f4" stroke="#6366a0" strokeWidth="3" strokeLinejoin="round"
+              style={{ transformOrigin: "40px 16px", animation: "flapOpen 0.4s ease-out forwards" }} />
+          </svg>
+        </div>
+      )}
+
+      {phase === "open" && (
+        <div style={{ animation: "letterSlide 0.5s ease-out" }}>
+          {/* Old paper letter */}
+          <div style={{
+            background: "linear-gradient(175deg, #f5f0e1, #ede7d4, #e8e0c8)",
+            border: "2px solid #c4b99a",
+            borderRadius: 4,
+            padding: "20px 18px",
+            maxWidth: 300,
+            boxShadow: "2px 3px 0 rgba(0,0,0,0.15), inset 0 0 20px rgba(160,140,100,0.1)",
+            imageRendering: "pixelated",
+            position: "relative",
+          }}>
+            {/* Paper texture dots */}
+            <div style={{
+              position: "absolute", inset: 0, borderRadius: 4, opacity: 0.08,
+              backgroundImage: "repeating-conic-gradient(#000 0% 25%, transparent 0% 50%)",
+              backgroundSize: "4px 4px",
+            }} />
+            {/* Torn top edge */}
+            <div style={{
+              position: "absolute", top: -2, left: 8, right: 8, height: 4,
+              background: "repeating-linear-gradient(90deg, #f5f0e1 0 3px, transparent 3px 5px)",
+            }} />
+
+            <div style={{ fontSize: 14, fontFamily: "var(--font-display)", fontWeight: 700, color: "#6b4c3b", marginBottom: 12, textAlign: "left" }}>
+              Dear Friend,
+            </div>
+            <p style={{ fontSize: 12, lineHeight: 1.9, color: "#5a4a3a", fontFamily: "var(--font-mono)", textAlign: "left", margin: 0, marginBottom: 8 }}>
+              Thank you for trusting us with your vision. It is a privilege to bring your ideas to life.
+            </p>
+            <p style={{ fontSize: 12, lineHeight: 1.9, color: "#5a4a3a", fontFamily: "var(--font-mono)", textAlign: "left", margin: 0, marginBottom: 8 }}>
+              Every project we work on is crafted with care, passion, and dedication to excellence.
+            </p>
+            <p style={{ fontSize: 12, lineHeight: 1.9, color: "#5a4a3a", fontFamily: "var(--font-mono)", textAlign: "left", margin: 0, marginBottom: 14 }}>
+              We look forward to creating something remarkable together.
+            </p>
+            <div style={{ borderTop: "1px dashed #c4b99a", paddingTop: 10 }}>
+              <div style={{ fontSize: 12, fontFamily: "var(--font-display)", fontStyle: "italic", color: "#7a6652" }}>With gratitude,</div>
+              <div style={{ fontSize: 13, fontFamily: "var(--font-mono)", fontWeight: 700, color: "#6b4c3b", marginTop: 2 }}>— Obaida</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
