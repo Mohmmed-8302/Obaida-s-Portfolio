@@ -40,12 +40,6 @@ export default function InternetExplorer() {
       {/* Page content */}
       <div className="flex-1 overflow-auto relative" style={{ background: "var(--color-blue-slate)" }}>
         <PortfolioPage />
-        {/* CRT overlay covering all IE content */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 40 }}>
-          <div className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(180deg, transparent 0px, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px)", animation: "crtFlicker 9s step-end infinite" }} />
-          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 50%, transparent 48%, rgba(0,0,0,0.5) 100%)" }} />
-          <div className="absolute left-0 right-0" style={{ height: "20%", background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.025) 50%, transparent)", animation: "crtScanMove 10s linear infinite" }} />
-        </div>
       </div>
 
       {/* Status bar */}

@@ -423,7 +423,6 @@ function PortfolioSection() {
 }
 
 function ContactSection() {
-  const [sent, setSent] = useState(false);
   const info = [["EMAIL", "technecal23@gmail.com"], ["PHONE", "+966 56 620 7480"], ["YOUTUBE", "@festeara-24 / Obaida"]] as const;
   return (
     <Section bg="var(--color-blush-white)">
@@ -447,41 +446,19 @@ function ContactSection() {
           </RetroCard>
         </Reveal>
         <Reveal delay={350}>
-          <RetroCard title="new_message.rec" className="h-full">
-            {sent ? (
-              <div className="text-center" style={{ padding: "20px 0" }}>
-                <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 8, color: "var(--color-dusty-rose)" }}>Message Sent</div>
-                <div style={{ fontSize: 13, opacity: 0.7 }}>We&apos;ll get back to you soon.</div>
-              </div>
-            ) : (
-              <div className="flex flex-col" style={{ gap: 12 }}>
-                <InputField label="Name" placeholder="Your name..." />
-                <InputField label="Email" placeholder="you@example.com" type="email" />
-                <InputField label="Message" placeholder="Your message..." multiline />
-                <div style={{ marginTop: 4 }}>
-                  <TrackButton onClick={() => setSent(true)}>Send Message</TrackButton>
-                </div>
-              </div>
-            )}
+          <RetroCard title="thank_you.letter" className="h-full">
+            <div className="flex flex-col items-center text-center" style={{ padding: "16px 8px", gap: 14 }}>
+              <div style={{ fontSize: 28, color: "var(--color-dusty-rose)" }}>&#9829;</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: "var(--color-dusty-rose)", fontFamily: "var(--font-display)" }}>Thank You</div>
+              <p style={{ fontSize: 13, lineHeight: 1.7, color: "var(--color-storm)", maxWidth: 320 }}>
+                Thank you for choosing us and trusting Obaida with your vision. Every project is a chance to create something unforgettable — and it&apos;s a privilege to be part of yours.
+              </p>
+              <div style={{ fontSize: 12, fontFamily: "var(--font-mono)", opacity: 0.5, marginTop: 4 }}>— Obaida</div>
+            </div>
           </RetroCard>
         </Reveal>
       </div>
     </Section>
-  );
-}
-
-function InputField({ label, placeholder, type = "text", multiline = false }: { label: string; placeholder: string; type?: string; multiline?: boolean }) {
-  const Tag = (multiline ? "textarea" : "input") as "input";
-  return (
-    <div className="flex flex-col">
-      <label className="font-bold uppercase" style={{ fontSize: 11, letterSpacing: "0.08em", marginBottom: 4, color: "var(--color-dusty-rose)" }}>{label}</label>
-      <Tag className="w-full outline-none" style={{
-        fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--color-blue-slate)",
-        background: "var(--color-blush-white)", border: "2px solid var(--color-storm)",
-        padding: "8px 12px", boxShadow: "inset 1px 1px 0 rgba(0,0,0,0.15)", lineHeight: 1.5,
-        resize: multiline ? "vertical" : "none",
-      }} placeholder={placeholder} {...(multiline ? { rows: 3 } : { type })} />
-    </div>
   );
 }
 
