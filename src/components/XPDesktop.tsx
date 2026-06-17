@@ -55,16 +55,7 @@ interface XPDesktopProps {
 
 /** Icons shown on the desktop, in order. */
 const DESKTOP_ICONS: { id: AppId; label: string }[] = [
-  { id: "mycomputer", label: "My Computer" },
-  { id: "mydocuments", label: "My Documents" },
-  { id: "recyclebin", label: "Recycle Bin" },
   { id: "ie", label: "Internet" },
-  { id: "word", label: "Microsoft Word" },
-  { id: "excel", label: "Microsoft Excel" },
-  { id: "powerpoint", label: "PowerPoint" },
-  { id: "notepad", label: "Notepad" },
-  { id: "paint", label: "Paint" },
-  { id: "games", label: "Games" },
 ];
 
 type IconPositions = Record<string, { x: number; y: number }>;
