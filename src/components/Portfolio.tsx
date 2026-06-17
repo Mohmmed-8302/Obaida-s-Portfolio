@@ -447,13 +447,18 @@ function ContactSection() {
         </Reveal>
         <Reveal delay={350}>
           <RetroCard title="thank_you.letter" className="h-full">
-            <div className="flex flex-col items-center text-center" style={{ padding: "16px 8px", gap: 14 }}>
-              <div style={{ fontSize: 28, color: "var(--color-dusty-rose)" }}>&#9829;</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: "var(--color-dusty-rose)", fontFamily: "var(--font-display)" }}>Thank You</div>
-              <p style={{ fontSize: 13, lineHeight: 1.7, color: "var(--color-storm)", maxWidth: 320 }}>
-                Thank you for choosing us and trusting Obaida with your vision. Every project is a chance to create something unforgettable — and it&apos;s a privilege to be part of yours.
+            <div className="flex flex-col items-center text-center" style={{ padding: "20px 12px", gap: 16 }}>
+              <div style={{ fontSize: 30, color: "var(--color-dusty-rose)" }}>&#9829;</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: "var(--color-dusty-rose)", fontFamily: "var(--font-display)", letterSpacing: "0.02em" }}>Thank You for Choosing Us</div>
+              <p style={{ fontSize: 13, lineHeight: 1.8, color: "var(--color-storm)", maxWidth: 340 }}>
+                Your trust means the world to us. Every project we take on is more than just work — it&apos;s a commitment to bringing your vision to life with passion and precision.
               </p>
-              <div style={{ fontSize: 12, fontFamily: "var(--font-mono)", opacity: 0.5, marginTop: 4 }}>— Obaida</div>
+              <p style={{ fontSize: 13, lineHeight: 1.8, color: "var(--color-storm)", maxWidth: 340 }}>
+                We look forward to creating something remarkable together. Your success is our greatest reward.
+              </p>
+              <div style={{ width: 40, height: 1, background: "var(--color-dusty-rose)", opacity: 0.4, margin: "4px 0" }} />
+              <div style={{ fontSize: 13, fontFamily: "var(--font-display)", color: "var(--color-storm)", fontStyle: "italic" }}>With gratitude,</div>
+              <div style={{ fontSize: 14, fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--color-dusty-rose)" }}>— Obaida</div>
             </div>
           </RetroCard>
         </Reveal>
