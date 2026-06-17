@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import type { AppId } from "./types";
 import { APPS } from "./registry";
@@ -19,8 +19,6 @@ const PINNED: AppId[] = ["ie"];
 const FREQUENT: AppId[] = [];
 
 export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuProps) {
-  const [showAll, setShowAll] = useState(false);
-
   const open = (id: AppId) => { onOpenApp(id); onClose(); };
 
   return (
@@ -46,30 +44,8 @@ export default function StartMenu({ onOpenApp, onClose, onShutdown }: StartMenuP
         <div className="flex" style={{ background: "#fff" }}>
           {/* Left pane */}
           <div className="relative" style={{ width: 196, background: "#fff", padding: "6px 0", display: "flex", flexDirection: "column" }}>
-            {PINNED.map((id) => <MenuRow key={id} icon={APPS[id].icon(26)} label={shortTitle(id)} onClick={() => open(id)} bold arrow />)}
+            {PINNED.map((id) => <MenuRow key={id} icon={APPS[id].icon(26)} label={shortTitle(id)} onClick={() => open(id)} bold />)}
             <div style={{ flex: 1 }} />
-            <Divider />
-            {/* All Programs */}
-            <button
-              className="w-full flex items-center gap-2 px-3 py-1.5"
-              style={{ fontSize: 12, fontWeight: 700, color: "#13409e", background: showAll ? "#316ac5" : "transparent", border: "none", cursor: "pointer" }}
-              onMouseEnter={() => setShowAll(true)}
-              onClick={() => setShowAll((v) => !v)}
-            >
-              <span style={{ color: showAll ? "#fff" : "#13409e" }}>All Programs</span>
-              <span style={{ marginLeft: "auto" }}><GreenArrow /></span>
-            </button>
-
-            {/* All Programs flyout */}
-            {showAll && (
-              <div
-                className="absolute"
-                style={{ left: 188, bottom: 0, width: 200, maxHeight: 470, overflowY: "auto", background: "#fff", border: "1px solid #8a8a8a", boxShadow: "3px 3px 10px rgba(0,0,0,0.35)", padding: "4px 0", zIndex: 5 }}
-                onMouseLeave={() => setShowAll(false)}
-              >
-                <MenuRow icon={APPS.ie.icon(22)} label={shortTitle("ie")} small onClick={() => open("ie")} />
-              </div>
-            )}
           </div>
 
           {/* Right pane */}
@@ -100,7 +76,7 @@ function shortTitle(id: AppId): string {
   return map[id] ?? APPS[id].title;
 }
 
-function MenuRow({ icon, label, onClick, bold, small, right, disabled, arrow, submenu }: { icon: ReactNode; label: string; onClick: () => void; bold?: boolean; small?: boolean; right?: boolean; disabled?: boolean; arrow?: boolean; submenu?: boolean }) {
+function MenuRow({ icon, label, onClick, bold, small, right, disabled, submenu }: { icon: ReactNode; label: string; onClick: () => void; bold?: boolean; small?: boolean; right?: boolean; disabled?: boolean; submenu?: boolean }) {
   return (
     <button
       className="w-full flex items-center gap-2.5 text-left"
@@ -111,18 +87,8 @@ function MenuRow({ icon, label, onClick, bold, small, right, disabled, arrow, su
     >
       <span className="shrink-0 flex items-center justify-center" style={{ width: small ? 22 : 28, height: small ? 22 : 28 }}>{icon}</span>
       <span className="truncate" style={{ flex: 1, fontSize: small ? 11.5 : 12, fontWeight: bold ? 700 : 400 }}>{label}</span>
-      {arrow && <GreenArrow />}
       {submenu && <span className="shrink-0" style={{ fontSize: 9, marginLeft: 4, color: disabled ? "#9aa6bb" : "#3a5f9e" }}>▶</span>}
     </button>
-  );
-}
-
-function GreenArrow() {
-  return (
-    <svg width="9" height="10" viewBox="0 0 9 10" className="shrink-0" style={{ marginLeft: 4 }}>
-      <polygon points="0,0 9,5 0,10" fill="#4caf3f" />
-      <polygon points="0,0 9,5 0,10" fill="none" stroke="#1f6e1f" strokeWidth="0.6" />
-    </svg>
   );
 }
 
