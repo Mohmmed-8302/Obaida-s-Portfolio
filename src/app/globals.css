@@ -112,6 +112,106 @@ body {
   0%   { top: -20%; }
   100% { top: 120%; }
 }
+@keyframes crtIeFlicker {
+  0%   { opacity: 0.028; }
+  5%   { opacity: 0.032; }
+  10%  { opacity: 0.028; }
+  15%  { opacity: 0.035; }
+  20%  { opacity: 0.028; }
+  50%  { opacity: 0.03; }
+  80%  { opacity: 0.028; }
+  85%  { opacity: 0.034; }
+  90%  { opacity: 0.028; }
+  95%  { opacity: 0.032; }
+  100% { opacity: 0.028; }
+}
+@keyframes crtIeScanline {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* ─── CRT effect scoped to IE portfolio content ─── */
+.ie-crt-wrap {
+  position: relative;
+}
+
+.ie-crt-wrap > .ie-crt-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+
+/* Scanlines */
+.ie-crt-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.12) 2px,
+    rgba(0, 0, 0, 0.12) 3px
+  );
+  z-index: 1;
+}
+
+/* Vignette */
+.ie-crt-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0, 0, 0, 0.35) 85%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  z-index: 2;
+}
+
+.ie-crt-rgb {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.03) 0px,
+      rgba(255, 0, 0, 0.03) 1px,
+      rgba(0, 255, 0, 0.03) 1px,
+      rgba(0, 255, 0, 0.03) 2px,
+      rgba(0, 0, 255, 0.03) 2px,
+      rgba(0, 0, 255, 0.03) 3px
+    );
+  z-index: 3;
+}
+
+.ie-crt-flicker {
+  position: absolute;
+  inset: 0;
+  background: rgba(180, 220, 255, 0.028);
+  animation: crtIeFlicker 0.12s infinite;
+  z-index: 4;
+}
+
+.ie-crt-scanbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(180, 255, 200, 0.025) 30%,
+    rgba(180, 255, 200, 0.04) 50%,
+    rgba(180, 255, 200, 0.025) 70%,
+    transparent 100%
+  );
+  animation: crtIeScanline 7s linear infinite;
+  z-index: 5;
+}
 
 /* ─── CRT desk peripherals (identity classes for targeting) ─── */
 .crt-mouse, .crt-keyboard { pointer-events: auto; }
