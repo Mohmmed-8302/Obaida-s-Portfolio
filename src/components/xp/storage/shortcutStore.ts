@@ -1,7 +1,6 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { scheduleCloudPush, registerHydrator } from "./cloudSync";
 import type { AppId } from "../types";
 
 /** Shortcuts the visitor has deleted — desktop icons and File-Explorer app/
@@ -25,31 +24,14 @@ let cache: RemovedShortcut[] | null = null;
 
 function read(): RemovedShortcut[] {
   if (cache) return cache;
-  if (typeof window === "undefined") return (cache = []);
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    const parsed = raw ? (JSON.parse(raw) as RemovedShortcut[]) : [];
-    cache = Array.isArray(parsed) ? parsed : [];
-  } catch { cache = []; }
+  cache = [];
   return cache;
 }
 
-function write(next: RemovedShortcut[], sync = true): void {
+function write(next: RemovedShortcut[]): void {
   cache = next;
-  if (typeof window !== "undefined") {
-    try { window.localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* quota */ }
-  }
   listeners.forEach((l) => l());
-  if (sync) scheduleCloudPush();
 }
-
-function hydrateShortcuts(raw: string): void {
-  try {
-    const parsed = JSON.parse(raw) as RemovedShortcut[];
-    write(Array.isArray(parsed) ? parsed : [], false);
-  } catch { /* ignore */ }
-}
-registerHydrator(KEY, hydrateShortcuts);
 
 function subscribe(cb: () => void): () => void {
   listeners.add(cb);

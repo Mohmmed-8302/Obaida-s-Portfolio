@@ -2,7 +2,6 @@
 
 import { useSyncExternalStore } from "react";
 import type { AppId, DocType } from "./types";
-import { scheduleCloudPush, registerHydrator } from "./storage/cloudSync";
 
 /** A user-created document, persisted per-visitor in localStorage and mirrored
  *  to the cloud. `content` is the owning app's own serialized format:
@@ -43,40 +42,28 @@ function uid(): string {
 
 function read(): DocFile[] {
   if (cache) return cache;
-  if (typeof window === "undefined") { cache = []; recompute(); return cache; }
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    const parsed = raw ? (JSON.parse(raw) as DocFile[]) : [];
-    cache = Array.isArray(parsed) ? parsed : [];
-  } catch {
-    cache = [];
-  }
+  cache = [];
   recompute();
   return cache;
 }
 
-function write(next: DocFile[], sync = true): void {
+function write(next: DocFile[]): void {
   cache = next;
   recompute();
-  if (typeof window !== "undefined") {
-    try { window.localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* quota / private mode */ }
-  }
   listeners.forEach((l) => l());
-  if (sync) scheduleCloudPush();
 }
 
 /** Stable snapshot accessors (populate cache on first call). */
 function liveSnapshot(): DocFile[] { read(); return liveCache; }
 function binSnapshot(): DocFile[] { read(); return deletedCache; }
 
-/** Replace the whole store from a cloud snapshot (no re-push). */
-function hydrateFiles(raw: string): void {
+/** Replace the whole store (used by cloud hydration). */
+export function hydrateFiles(raw: string): void {
   try {
     const parsed = JSON.parse(raw) as DocFile[];
-    write(Array.isArray(parsed) ? parsed : [], false);
+    write(Array.isArray(parsed) ? parsed : []);
   } catch { /* ignore */ }
 }
-registerHydrator(KEY, hydrateFiles);
 
 function subscribe(cb: () => void): () => void {
   listeners.add(cb);
@@ -256,15 +243,9 @@ const SEEDS: { id: string; type: DocType; name: string; content: string }[] = [
   { id: "seed-reel", type: "powerpoint", name: "reel_2025.ppt", content: REEL_SLIDES },
 ];
 
-/** Seed first-run demo docs. No-op once seeded or if any files already exist. */
+/** Seed demo docs into the in-memory store on each session. */
 export function seedDemoFiles(): void {
-  if (typeof window === "undefined") return;
-  try { if (window.localStorage.getItem(SEEDED_KEY)) return; } catch { /* ignore */ }
-  if (read().length > 0) {
-    try { window.localStorage.setItem(SEEDED_KEY, "1"); } catch { /* ignore */ }
-    return;
-  }
+  if (read().length > 0) return;
   const now = Date.now();
   write(SEEDS.map((s, i) => ({ ...s, modified: now - i })));
-  try { window.localStorage.setItem(SEEDED_KEY, "1"); } catch { /* ignore */ }
 }

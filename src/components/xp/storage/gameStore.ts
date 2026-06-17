@@ -1,7 +1,6 @@
 "use client";
 
 import { useSyncExternalStore, useCallback } from "react";
-import { scheduleCloudPush } from "./cloudSync";
 
 /** Per-game saved data (high scores, best times, win tallies …). Each game owns
  *  the shape of its own slice; everything is persisted to localStorage and synced
@@ -15,29 +14,18 @@ let cache: GameSaves | null = null;
 
 function read(): GameSaves {
   if (cache) return cache;
-  if (typeof window === "undefined") return (cache = {});
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    const parsed = raw ? (JSON.parse(raw) as GameSaves) : {};
-    cache = parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    cache = {};
-  }
+  cache = {};
   return cache;
 }
 
-function write(next: GameSaves, sync = true): void {
+function write(next: GameSaves): void {
   cache = next;
-  if (typeof window !== "undefined") {
-    try { window.localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* quota */ }
-  }
   listeners.forEach((l) => l());
-  if (sync) scheduleCloudPush();
 }
 
 /** Replace the whole store (used by cloud hydration). */
 export function hydrateGameSaves(next: GameSaves): void {
-  write(next, false);
+  write(next);
 }
 
 function subscribe(cb: () => void): () => void {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { scheduleCloudPush } from "./cloudSync";
 
 /** A site shortcut pinned to the taskbar Quick Launch bar. Opening it launches
  *  the Internet Explorer app navigated to `url`. */
@@ -17,7 +16,6 @@ let cache: Pin[] | null = null;
 
 const DEFAULTS: Pin[] = [
   { id: "p-portfolio", name: "Obaida Portfolio", url: "portfolio" },
-  { id: "p-google", name: "Google", url: "https://www.google.com/webhp?igu=1" },
 ];
 
 function uid(): string {
@@ -29,29 +27,17 @@ function uid(): string {
 
 function read(): Pin[] {
   if (cache) return cache;
-  if (typeof window === "undefined") return (cache = DEFAULTS);
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    if (raw === null) { cache = DEFAULTS; return cache; }
-    const parsed = JSON.parse(raw) as Pin[];
-    cache = Array.isArray(parsed) ? parsed : DEFAULTS;
-  } catch {
-    cache = DEFAULTS;
-  }
+  cache = DEFAULTS;
   return cache;
 }
 
-function write(next: Pin[], sync = true): void {
+function write(next: Pin[]): void {
   cache = next;
-  if (typeof window !== "undefined") {
-    try { window.localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* quota */ }
-  }
   listeners.forEach((l) => l());
-  if (sync) scheduleCloudPush();
 }
 
 export function hydratePins(next: Pin[]): void {
-  write(next, false);
+  write(next);
 }
 
 function subscribe(cb: () => void): () => void {

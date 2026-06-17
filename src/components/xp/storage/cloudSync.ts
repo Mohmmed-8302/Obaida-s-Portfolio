@@ -68,33 +68,11 @@ function applySnapshot(data: Record<string, string>): void {
 
 /** Called once from the desktop on mount. `onAfterHydrate` lets the desktop
  *  refresh React state (settings, icon positions) after a cloud pull. */
-export async function initCloudSync(onAfterHydrate?: () => void): Promise<void> {
-  if (initialized || typeof window === "undefined") return;
-  initialized = true;
-  try {
-    const res = await fetch(`/api/saves?deviceId=${encodeURIComponent(getDeviceId())}`, { cache: "no-store" });
-    const json = await res.json().catch(() => null);
-    if (!json || json.configured === false) { cloudEnabled = false; emit("local"); return; }
-    cloudEnabled = true;
-    if (json.savedAt && json.data && json.savedAt > localSavedAt()) {
-      applySnapshot(json.data as Record<string, string>);
-      setLocalSavedAt(json.savedAt);
-      onAfterHydrate?.();
-      emit("saved");
-    } else {
-      pushNow(); // local newer or cloud empty → seed the cloud
-    }
-  } catch {
-    cloudEnabled = false;
-    emit("offline");
-  }
+export async function initCloudSync(_onAfterHydrate?: () => void): Promise<void> {
+  emit("local");
 }
 
-export function scheduleCloudPush(): void {
-  if (typeof window === "undefined") return;
-  if (pushTimer) clearTimeout(pushTimer);
-  pushTimer = setTimeout(pushNow, 1200);
-}
+export function scheduleCloudPush(): void {}
 
 async function pushNow(): Promise<void> {
   if (typeof window === "undefined" || !cloudEnabled) return;

@@ -5,9 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { AppId, AppPayload, Rect, WindowInstance, XpSettings, XpTheme } from "./xp/types";
 import { APPS } from "./xp/registry";
 import { DesktopContext, DEFAULT_SETTINGS, type XpNotice } from "./xp/DesktopContext";
-import { initCloudSync, registerHydrator, scheduleCloudPush } from "./xp/storage/cloudSync";
 import { seedDemoFiles } from "./xp/fileStore";
-import { useHiddenKeys, removeShortcut, desktopKey } from "./xp/storage/shortcutStore";
+import { useHiddenKeys, desktopKey } from "./xp/storage/shortcutStore";
 import { play, setSoundConfig } from "./xp/storage/sound";
 import XPWindow from "./xp/XPWindow";
 import Taskbar, { TASKBAR_HEIGHT } from "./xp/Taskbar";
@@ -47,15 +46,7 @@ const GRID_PAD_X = 8;
 const GRID_PAD_Y = 8;
 
 function loadSettings(): XpSettings {
-  if (typeof window === "undefined") return DEFAULT_SETTINGS;
-  try {
-    const raw = window.localStorage.getItem(SETTINGS_KEY);
-    if (!raw) return DEFAULT_SETTINGS;
-    const parsed = JSON.parse(raw) as Partial<XpSettings>;
-    return { ...DEFAULT_SETTINGS, ...parsed, screensaver: { ...DEFAULT_SETTINGS.screensaver, ...parsed.screensaver } };
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
+  return DEFAULT_SETTINGS;
 }
 
 interface XPDesktopProps {
@@ -93,12 +84,7 @@ function computeDefaultPositions(vw: number, vh: number): IconPositions {
 }
 
 function loadIconPositions(): IconPositions | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(ICON_POS_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as IconPositions;
-  } catch { return null; }
+  return null;
 }
 
 function positionsAreValid(positions: IconPositions, vw: number, vh: number): boolean {
@@ -167,14 +153,7 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
   const openCount = useRef(0);
 
   const updateSettings = useCallback((patch: Partial<XpSettings>) => {
-    setSettings((prev) => {
-      const next = { ...prev, ...patch };
-      if (typeof window !== "undefined") {
-        try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(next)); } catch { /* ignore */ }
-      }
-      scheduleCloudPush();
-      return next;
-    });
+    setSettings((prev) => ({ ...prev, ...patch }));
   }, []);
 
   const notify = useCallback((title: string, body: string, icon?: React.ReactNode) => {
@@ -195,16 +174,9 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
   // Keep the sound engine in sync with mute/volume settings.
   useEffect(() => { setSoundConfig({ muted: settings.muted, volume: settings.volume }); }, [settings.muted, settings.volume]);
 
-  // Cloud sync: hydrate from Blob if newer, then seed first-run demo docs.
   useEffect(() => {
-    registerHydrator(SETTINGS_KEY, (raw) => {
-      try { setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(raw) }); } catch { /* ignore */ }
-    });
-    registerHydrator(ICON_POS_KEY, (raw) => {
-      try { setIconPositions(JSON.parse(raw)); } catch { /* ignore */ }
-    });
     setSoundConfig({ muted: settings.muted, volume: settings.volume });
-    initCloudSync().finally(() => seedDemoFiles());
+    seedDemoFiles();
     play("startup");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -318,14 +290,6 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
 
   const onDesktopMouseDown = useCallback(() => { setStartOpen(false); setSelectedIcon(null); setCtxMenu(null); setIconMenu(null); }, []);
 
-  const deleteIcon = useCallback((id: AppId, label: string) => {
-    removeShortcut({ key: desktopKey(id), kind: "desktop", appId: id, label });
-    play("trash");
-    notify("Deleted", `“${label}” was moved to the Recycle Bin.`);
-    setIconMenu(null);
-    setSelectedIcon((cur) => (cur === id ? null : cur));
-  }, [notify]);
-
   const onDesktopContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setStartOpen(false);
@@ -334,11 +298,7 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
 
   const desktopApi = useMemo(() => ({ openApp, closeApp, payloads, settings, updateSettings, notify, setDocTitle }), [openApp, closeApp, payloads, settings, updateSettings, notify, setDocTitle]);
 
-  // Persist icon positions
-  useEffect(() => {
-    try { window.localStorage.setItem(ICON_POS_KEY, JSON.stringify(iconPositions)); } catch { /* ignore */ }
-    scheduleCloudPush();
-  }, [iconPositions]);
+  // (icon positions are kept in-memory only, no persistence)
 
   // Recompute icon positions when viewport resizes and current positions are invalid
   useEffect(() => {
@@ -493,7 +453,6 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
             x={iconMenu.x}
             y={iconMenu.y}
             onOpen={() => { openApp(iconMenu.id); setIconMenu(null); }}
-            onDelete={() => deleteIcon(iconMenu.id, iconMenu.label)}
           />
         )}
 
@@ -568,29 +527,24 @@ function DesktopMenu({ x, y, onClose, onProperties }: { x: number; y: number; on
   );
 }
 
-function IconMenu({ x, y, onOpen, onDelete }: { x: number; y: number; onOpen: () => void; onDelete: () => void }) {
+function IconMenu({ x, y, onOpen }: { x: number; y: number; onOpen: () => void }) {
   const left = typeof window !== "undefined" ? Math.min(x, window.innerWidth - 160) : x;
   const top = typeof window !== "undefined" ? Math.min(y, window.innerHeight - 100) : y;
-  const Item = ({ label, onClick, bold }: { label: string; onClick: () => void; bold?: boolean }) => (
-    <button
-      className="w-full text-left"
-      style={{ padding: "4px 22px", border: "none", background: "transparent", fontSize: 11, fontWeight: bold ? 700 : 400, color: "#222", cursor: "pointer" }}
-      onClick={onClick}
-      onMouseEnter={(e) => { e.currentTarget.style.background = "#316ac5"; e.currentTarget.style.color = "#fff"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#222"; }}
-    >
-      {label}
-    </button>
-  );
   return (
     <div
       className="absolute"
       style={{ left, top, zIndex: 150, minWidth: 150, background: "#fff", border: "1px solid #8a8a8a", boxShadow: "3px 3px 10px rgba(0,0,0,0.35)", padding: "2px 0", fontFamily: "Tahoma, sans-serif" }}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <Item label="Open" onClick={onOpen} bold />
-      <div style={{ height: 1, background: "#d6d2c2", margin: "3px 2px" }} />
-      <Item label="Delete" onClick={onDelete} />
+      <button
+        className="w-full text-left"
+        style={{ padding: "4px 22px", border: "none", background: "transparent", fontSize: 11, fontWeight: 700, color: "#222", cursor: "pointer" }}
+        onClick={onOpen}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "#316ac5"; e.currentTarget.style.color = "#fff"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#222"; }}
+      >
+        Open
+      </button>
     </div>
   );
 }
