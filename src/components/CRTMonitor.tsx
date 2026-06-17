@@ -56,7 +56,7 @@ export default function CRTMonitor({ onPower, powered, children }: CRTMonitorPro
       {/* Scene: monitor + keyboard + mouse, centered and scaled to fit */}
       <div className="absolute left-1/2 top-1/2" style={{ transform: `translate(-50%, -50%) scale(${scale})`, width: SCENE_W, height: SCENE_H }}>
         {/* ── Mouse (right of keyboard, on the desk) ── */}
-        <div className="absolute" style={{ left: 570, top: 555, width: 76, height: 116, zIndex: 2 }}>
+        <div className="absolute" style={{ left: 530, top: 540, width: 76, height: 116, zIndex: 2 }}>
           {/* cable */}
           <div className="absolute" style={{
             left: -30, top: 8, width: 60, height: 40,
