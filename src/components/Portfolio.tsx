@@ -25,7 +25,7 @@ export default function Portfolio() {
 function Section({ bg, children, id }: { bg: string; children: React.ReactNode; id?: string }) {
   return (
     <section id={id} style={{ background: bg }}>
-      <div className="section-inner" style={{ maxWidth: 640, margin: "0 auto", padding: "52px 28px" }}>
+      <div className="section-inner" style={{ margin: "0 auto" }}>
         {children}
       </div>
     </section>
@@ -327,7 +327,7 @@ function StorySection() {
   ];
   return (
     <section style={{ background: "var(--color-storm)" }}>
-      <div style={{ padding: "52px 28px" }}>
+      <div className="section-inner" style={{ margin: "0 auto" }}>
       <SectionHead label="Timeline" title="Obaida's Story" />
       <div className="relative" style={{ paddingLeft: 34 }}>
         <div className="absolute" style={{ left: 14, top: 6, bottom: 6, width: 2, background: "var(--color-dusty-rose)" }} />
@@ -573,7 +573,7 @@ function ThankYouMail() {
 function FooterSection() {
   return (
     <footer style={{ background: "var(--color-storm)", borderTop: "2px solid var(--color-storm-light)", padding: "20px 28px" }}>
-      <div style={{ maxWidth: 640, margin: "0 auto" }}>
+      <div className="section-inner" style={{ margin: "0 auto" }}>
         <div className="flex overflow-hidden" style={{ gap: 4, marginBottom: 16 }}>
           {Array.from({ length: 40 }).map((_, i) => (
             <div key={i} className="shrink-0" style={{ width: 16, height: 10, opacity: 0.2, border: "2px solid var(--color-dusty-rose)" }} />

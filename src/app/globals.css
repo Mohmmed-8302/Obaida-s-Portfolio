@@ -234,7 +234,7 @@ body {
 
 /* ─── Portfolio responsive container queries ─── */
 
-.portfolio-root .section-inner { max-width: 100%; }
+.portfolio-root .section-inner { max-width: 100%; padding: 52px 28px; }
 .portfolio-root .two-col-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
 .portfolio-root .projects-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
 
@@ -277,16 +277,30 @@ body {
 
 /* Large: 750px+ */
 @container (min-width: 750px) {
-  .portfolio-root .section-inner { padding: 52px 28px; max-width: 640px; }
+  .portfolio-root .section-inner { padding: 52px 36px; max-width: 92%; }
   .portfolio-root .section-title { font-size: 34px !important; }
   .portfolio-root .two-col-grid { grid-template-columns: repeat(2, 1fr); }
   .portfolio-root .projects-grid { grid-template-columns: repeat(3, 1fr); }
   .portfolio-root .stats-grid { grid-template-columns: repeat(3, 1fr) !important; }
 }
 
-/* Extra large: 1000px+ — wider content area */
+/* Extra large: 1000px+ */
 @container (min-width: 1000px) {
-  .portfolio-root .section-inner { max-width: 860px; }
+  .portfolio-root .section-inner { max-width: 90%; padding: 56px 40px; }
   .portfolio-root .hero-logo { width: 200px !important; }
-  .portfolio-root .hero-section { padding: 80px 28px 90px !important; }
+  .portfolio-root .hero-section { padding: 80px 40px 90px !important; }
+}
+
+/* Wide: 1200px+ */
+@container (min-width: 1200px) {
+  .portfolio-root .section-inner { max-width: 1080px; padding: 60px 48px; }
+  .portfolio-root .section-title { font-size: 38px !important; }
+  .portfolio-root .hero-section { padding: 90px 48px 100px !important; }
+  .portfolio-root .hero-logo { width: 220px !important; }
+}
+
+/* Full: 1400px+ */
+@container (min-width: 1400px) {
+  .portfolio-root .section-inner { max-width: 1240px; padding: 64px 56px; }
+  .portfolio-root .hero-section { padding: 100px 56px 110px !important; }
 }
