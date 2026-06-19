@@ -1,4 +1,10 @@
 {
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
+    }
+  },
   "hooks": {
     "Stop": [
       {
@@ -12,13 +18,26 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"$p = $env:CLAUDE_USER_PROMPT; if ($p -match 'portfolio|website|landing page|UI|frontend|design|component|page|layout') { Write-Output 'SKILLS_ACTIVE: frontend-design + react-best-practices are AUTO-ENABLED for this task. Apply frontend-design principles (distinctive palette, subject-grounded choices, restraint, one signature element) and react-best-practices rules (no waterfalls, minimize bundle, memoize correctly, no inline components) to ALL code and design decisions.' }\"",
+            "shell": "powershell",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   },
   "permissions": {
     "allow": [
       "Bash(git *)",
       "Bash(vercel *)",
-      "Bash(npx vercel *)"
+      "Bash(npx vercel *)",
+      "Bash(npx -y chrome-devtools-mcp*)"
     ]
   }
 }
