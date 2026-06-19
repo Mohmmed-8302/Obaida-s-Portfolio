@@ -261,7 +261,7 @@ function HeroSection() {
         </Reveal>
 
         <Reveal delay={240}>
-          <p className="pf-lead" style={{ maxWidth: "54ch", marginBottom: 40 }}>
+          <p className="pf-lead" style={{ fontFamily: "var(--font-body)", maxWidth: "54ch", marginBottom: 40 }}>
             Obaida crafts viral gaming edits, education content, and awareness clips —
             every frame engineered to hold attention. No templates. No filler.
           </p>
@@ -285,7 +285,7 @@ function HeroSection() {
           <div className="pf-stats" style={{ marginTop: "clamp(48px, 8cqi, 96px)" }}>
             {HERO_STATS.map(s => (
               <div key={s.label} style={{ background: "var(--pf-bg)", padding: "22px 20px" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(26px, 3.4cqi, 40px)", fontWeight: 700, color: "var(--pf-text)" }}>{s.value}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(26px, 3.4cqi, 40px)", fontWeight: 700, color: "var(--pf-text)" }}>{s.value}</div>
                 <div className="pf-meta" style={{ marginTop: 6 }}>{s.label}</div>
               </div>
             ))}
@@ -306,7 +306,7 @@ function MarqueeSection() {
               {MARQUEE_ITEMS.map(item => (
                 <span key={item} style={{ display: "inline-flex", alignItems: "center" }}>
                   <span style={{
-                    fontFamily: "var(--font-display)", fontStyle: "italic",
+                    fontFamily: "var(--font-mono)", fontStyle: "italic",
                     fontSize: "clamp(22px, 3cqi, 38px)", color: "var(--pf-text)", padding: "0 28px",
                   }}>{item}</span>
                   <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--pf-accent)" }} />
@@ -331,18 +331,18 @@ function AboutSection() {
           <div>
             <Reveal delay={120}>
               <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginBottom: 28 }}>
-                Built to be watched, not skipped.
+                Who We Are
               </h2>
             </Reveal>
             <Reveal delay={240}>
-              <p className="pf-lead" style={{ marginBottom: 18 }}>
+              <p className="pf-lead" style={{ fontFamily: "var(--font-body)", marginBottom: 18 }}>
                 Self-taught since 2024, Obaida mastered the one thing most creators ignore:
                 why people stop scrolling. The work lives under three minutes —
                 tight, intentional, and made to perform.
               </p>
             </Reveal>
             <Reveal delay={360}>
-              <p style={{ fontSize: "clamp(16px, 2cqi, 22px)", fontWeight: 700, color: "var(--pf-accent)", lineHeight: 1.4 }}>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: "clamp(16px, 2cqi, 22px)", fontWeight: 700, color: "var(--pf-accent)", lineHeight: 1.4 }}>
                 No templates. No filler. Just work that gets seen.
               </p>
             </Reveal>
@@ -389,10 +389,10 @@ function WorkCard({ item, delay }: { item: typeof WORK[number]; delay: number })
         {/* Body */}
         <div style={{ padding: "22px 22px 24px", flex: 1, display: "flex", flexDirection: "column" }}>
           <div className="flex items-start justify-between" style={{ gap: 12, marginBottom: 8 }}>
-            <h3 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(20px, 2.6cqi, 26px)", fontWeight: 700, color: "var(--pf-text)", lineHeight: 1.15 }}>{item.title}</h3>
+            <h3 style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(20px, 2.6cqi, 26px)", fontWeight: 700, color: "var(--pf-text)", lineHeight: 1.15 }}>{item.title}</h3>
             <span className="pf-arrow" style={{ fontSize: 20, color: "var(--pf-faint)", flexShrink: 0 }}>↗</span>
           </div>
-          <p style={{ fontSize: 13.5, lineHeight: 1.6, color: "var(--pf-muted)", marginBottom: 16, flex: 1 }}>{item.desc}</p>
+          <p style={{ fontFamily: "var(--font-body)", fontSize: 13.5, lineHeight: 1.6, color: "var(--pf-muted)", marginBottom: 16, flex: 1 }}>{item.desc}</p>
           <div className="pf-meta">{item.meta}</div>
         </div>
       </article>
@@ -411,7 +411,7 @@ function WorkSection() {
             </Reveal>
             <Reveal delay={120}>
               <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18 }}>
-                Work that earns the watch.
+                Projects &amp; Portfolio
               </h2>
             </Reveal>
           </div>
@@ -452,7 +452,7 @@ function CapabilitiesSection() {
         </Reveal>
         <Reveal delay={120}>
           <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18, marginBottom: "clamp(36px, 5cqi, 60px)" }}>
-            What we bring to the edit.
+            Experience &amp; Skills
           </h2>
         </Reveal>
 
@@ -477,7 +477,7 @@ function CapabilitiesSection() {
                 }}>
                   <span className="pf-meta" style={{ color: "var(--pf-accent)", flexShrink: 0 }}>{s.n}</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(18px, 2.2cqi, 24px)", fontWeight: 700, color: "var(--pf-text)" }}>{s.label}</div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(18px, 2.2cqi, 24px)", fontWeight: 700, color: "var(--pf-text)" }}>{s.label}</div>
                     <div className="pf-meta" style={{ marginTop: 4 }}>{s.note}</div>
                   </div>
                 </div>
@@ -499,7 +499,7 @@ function JourneySection() {
         </Reveal>
         <Reveal delay={120}>
           <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18, marginBottom: "clamp(36px, 5cqi, 64px)" }}>
-            How we got here.
+            Obaida&apos;s Story
           </h2>
         </Reveal>
 
@@ -507,9 +507,9 @@ function JourneySection() {
           {JOURNEY.map((e, i) => (
             <Reveal key={e.year} delay={i * 120}>
               <div style={{ borderTop: "2px solid var(--pf-accent)", paddingTop: 22 }}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(36px, 5cqi, 56px)", fontWeight: 700, color: "var(--pf-text)", lineHeight: 1 }}>{e.year}</div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--pf-accent)", marginTop: 14, marginBottom: 8 }}>{e.title}</div>
-                <p style={{ fontSize: 14, lineHeight: 1.65, color: "var(--pf-muted)" }}>{e.desc}</p>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(36px, 5cqi, 56px)", fontWeight: 700, color: "var(--pf-text)", lineHeight: 1 }}>{e.year}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 15, fontWeight: 700, color: "var(--pf-accent)", marginTop: 14, marginBottom: 8 }}>{e.title}</div>
+                <p style={{ fontFamily: "var(--font-body)", fontSize: 14, lineHeight: 1.65, color: "var(--pf-muted)" }}>{e.desc}</p>
               </div>
             </Reveal>
           ))}
@@ -531,15 +531,14 @@ function ContactSection() {
           <SectionLabel index="05" total="05" label="Contact" />
         </Reveal>
         <Reveal delay={120}>
-          <h2 className="pf-display" style={{ color: "var(--pf-text)", maxWidth: "14ch", margin: "24px 0 36px" }}>
-            Let&apos;s make something{" "}
-            <span style={{ color: "var(--pf-accent)", fontStyle: "italic" }}>worth watching.</span>
+          <h2 className="pf-h2" style={{ color: "var(--pf-text)", margin: "24px 0 36px" }}>
+            Get in Touch
           </h2>
         </Reveal>
 
         <Reveal delay={240}>
           <a href={`mailto:${EMAIL}`} className="pf-link" style={{
-            display: "inline-block", fontFamily: "var(--font-display)",
+            display: "inline-block", fontFamily: "var(--font-mono)",
             fontSize: "clamp(20px, 3cqi, 34px)", fontWeight: 700, marginBottom: 44,
           }}>{EMAIL}</a>
         </Reveal>
@@ -550,7 +549,7 @@ function ContactSection() {
               <Reveal key={c.label} delay={300 + i * 80}>
                 <div>
                   <div className="pf-meta" style={{ marginBottom: 6 }}>{c.label}</div>
-                  <div style={{ fontSize: 14, color: "var(--pf-text)", wordBreak: "break-word" }}>{c.value}</div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--pf-text)", wordBreak: "break-word" }}>{c.value}</div>
                 </div>
               </Reveal>
             ))}
@@ -572,7 +571,7 @@ function FooterSection() {
     <footer style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
       <div className="section-inner" style={{ paddingTop: "clamp(40px, 6cqi, 72px)", paddingBottom: "clamp(40px, 6cqi, 72px)" }}>
         <div className="flex flex-wrap items-center justify-between" style={{ gap: 24, marginBottom: 40 }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 5cqi, 52px)", fontWeight: 700, color: "var(--pf-text)" }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(28px, 5cqi, 52px)", fontWeight: 700, color: "var(--pf-text)" }}>
             Obaida<span style={{ color: "var(--pf-accent)" }}>.</span>
           </div>
           <button onClick={toTop} className="pf-meta" style={{

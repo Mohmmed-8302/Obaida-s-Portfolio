@@ -31,6 +31,7 @@
   --color-storm-lighter: #3A404D;
   --font-mono: 'Courier New Custom', 'Courier New', monospace;
   --font-display: 'Cambria Custom', 'Cambria', Georgia, serif;
+  --font-body: Arial, 'Helvetica Neue', Helvetica, sans-serif;
 }
 
 /* Keep the reset in the base layer so Tailwind utility classes
@@ -268,6 +269,7 @@ body {
   color: var(--pf-accent);
 }
 .portfolio-root .pf-lead {
+  font-family: var(--font-body);
   font-size: clamp(15px, 1.65cqi, 19px);
   line-height: 1.65;
   color: var(--pf-muted);
