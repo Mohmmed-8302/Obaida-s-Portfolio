@@ -32,9 +32,56 @@ export default function InternetExplorer() {
         </div>
       </div>
 
-      {/* Page content */}
-      <div className="flex-1 overflow-auto relative" style={{ background: "var(--color-blue-slate)" }}>
-        <PortfolioPage />
+      {/* Page content — CRT effect wrapper */}
+      <div className="flex-1 overflow-hidden relative" style={{ background: "#0a0a0a" }}>
+        <div className="absolute inset-0 overflow-auto crt-content" style={{ imageRendering: "pixelated" }}>
+          <PortfolioPage />
+        </div>
+        {/* Scanlines */}
+        <div className="pointer-events-none absolute inset-0 z-10 crt-scanlines" />
+        {/* Screen edge vignette */}
+        <div className="pointer-events-none absolute inset-0 z-10" style={{ boxShadow: "inset 0 0 60px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.3)" }} />
+        {/* Phosphor RGB fringe */}
+        <div className="pointer-events-none absolute inset-0 z-10 crt-rgb" />
+        {/* Flicker */}
+        <div className="pointer-events-none absolute inset-0 z-10 crt-flicker" />
+        <style>{`
+          .crt-scanlines {
+            background: repeating-linear-gradient(
+              to bottom,
+              transparent 0px,
+              transparent 2px,
+              rgba(0,0,0,0.15) 2px,
+              rgba(0,0,0,0.15) 4px
+            );
+          }
+          .crt-rgb {
+            background: repeating-linear-gradient(
+              to right,
+              rgba(255,0,0,0.02) 0px,
+              rgba(0,255,0,0.02) 1px,
+              rgba(0,0,255,0.02) 2px,
+              transparent 3px
+            );
+            mix-blend-mode: screen;
+          }
+          .crt-flicker {
+            animation: crt-flicker 0.15s infinite;
+            background: transparent;
+          }
+          @keyframes crt-flicker {
+            0% { opacity: 0.97; }
+            50% { opacity: 1; }
+            100% { opacity: 0.98; }
+          }
+          .crt-content {
+            text-shadow: 0 0 3px rgba(170,255,170,0.12);
+          }
+          .crt-content * {
+            font-smooth: never;
+            -webkit-font-smoothing: none;
+          }
+        `}</style>
       </div>
 
       {/* Status bar */}
