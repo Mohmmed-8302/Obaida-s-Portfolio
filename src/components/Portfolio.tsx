@@ -178,32 +178,45 @@ function MagneticButton({ children, href, onClick }: {
   children: React.ReactNode; href?: string; onClick?: () => void;
 }) {
   const btnRef = useRef<HTMLElement>(null);
+  const [pressed, setPressed] = useState(false);
   const onMove = useCallback((e: React.MouseEvent) => {
     const el = btnRef.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    const x = ((e.clientX - r.left - r.width / 2) / (r.width / 2)) * 4;
-    const y = ((e.clientY - r.top - r.height / 2) / (r.height / 2)) * 4;
+    const x = ((e.clientX - r.left - r.width / 2) / (r.width / 2)) * 6;
+    const y = ((e.clientY - r.top - r.height / 2) / (r.height / 2)) * 6;
     el.style.transform = `translate(${x}px, ${y}px)`;
   }, []);
   const onLeave = useCallback(() => {
     const el = btnRef.current;
     if (el) el.style.transform = "";
+    setPressed(false);
   }, []);
 
   const style: React.CSSProperties = {
     fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700,
     textTransform: "uppercase", letterSpacing: "0.14em",
-    padding: "16px 30px", cursor: "pointer", borderRadius: 2,
-    border: "none", display: "inline-flex", alignItems: "center", gap: 10,
+    padding: pressed ? "14px 28px 12px 30px" : "12px 30px 14px 28px",
+    cursor: "pointer", borderRadius: 0,
+    display: "inline-flex", alignItems: "center", gap: 10,
     textDecoration: "none", whiteSpace: "nowrap",
     background: "var(--pf-accent)", color: "#0B0D11",
-    transition: "transform .25s cubic-bezier(.22,.61,.36,1), background .3s ease",
+    borderTop: pressed ? "3px solid #6B2A3A" : "3px solid #E8B0BF",
+    borderLeft: pressed ? "3px solid #6B2A3A" : "3px solid #E8B0BF",
+    borderBottom: pressed ? "3px solid #E8B0BF" : "3px solid #6B2A3A",
+    borderRight: pressed ? "3px solid #E8B0BF" : "3px solid #6B2A3A",
+    boxShadow: pressed
+      ? "inset 1px 1px 3px rgba(0,0,0,0.3)"
+      : "2px 3px 0px #000, inset 0 1px 0 rgba(255,255,255,0.15)",
+    imageRendering: "pixelated",
+    transition: "transform .2s cubic-bezier(.22,.61,.36,1)",
+    textShadow: "1px 1px 0 rgba(255,255,255,0.2)",
   };
   const Tag = (href ? "a" : "button") as "a";
   return (
     <Tag ref={btnRef as never} style={style} href={href} onClick={onClick}
-      onMouseMove={onMove} onMouseLeave={onLeave}>
+      onMouseMove={onMove} onMouseLeave={onLeave}
+      onMouseDown={() => setPressed(true)} onMouseUp={() => setPressed(false)}>
       {children}
       <span aria-hidden style={{ fontSize: 15 }}>→</span>
     </Tag>
@@ -271,9 +284,16 @@ function HeroSection() {
           <div className="flex flex-wrap items-center" style={{ gap: 20 }}>
             <MagneticButton onClick={goWork}>View Selected Work</MagneticButton>
             <button onClick={goContact} className="pf-link" style={{
-              background: "transparent", border: "none", cursor: "pointer",
+              background: "var(--pf-bg)", cursor: "pointer",
               fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700,
               textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--pf-text)",
+              padding: "12px 24px",
+              borderTop: "3px solid var(--pf-line-strong)",
+              borderLeft: "3px solid var(--pf-line-strong)",
+              borderBottom: "3px solid #000",
+              borderRight: "3px solid #000",
+              boxShadow: "2px 3px 0px #000",
+              textShadow: "1px 1px 0 rgba(0,0,0,0.3)",
             }}>
               Get in touch
             </button>
@@ -575,8 +595,13 @@ function FooterSection() {
             Obaida<span style={{ color: "var(--pf-accent)" }}>.</span>
           </div>
           <button onClick={toTop} className="pf-meta" style={{
-            background: "transparent", border: "1px solid var(--pf-line)", cursor: "pointer",
+            background: "var(--pf-bg)", cursor: "pointer",
             padding: "12px 18px", color: "var(--pf-muted)", display: "inline-flex", alignItems: "center", gap: 8,
+            borderTop: "3px solid var(--pf-line-strong)",
+            borderLeft: "3px solid var(--pf-line-strong)",
+            borderBottom: "3px solid #000",
+            borderRight: "3px solid #000",
+            boxShadow: "2px 3px 0px #000",
           }}>
             Back to top <span aria-hidden>↑</span>
           </button>
