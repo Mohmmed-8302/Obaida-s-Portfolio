@@ -93,6 +93,21 @@ function processReveals() {
   if (revealRegistry.size === 0) stopRevealListening();
 }
 
+// Find the nearest scrollable ancestor of `el`. The portfolio renders inside
+// a nested scroll container (the IE window's CRT viewport), so a window-level
+// scroll listener never sees its scroll events — we must bind the real one.
+function getScrollParent(el: Element | null): HTMLElement | Window {
+  let node = el?.parentElement ?? null;
+  while (node && node !== document.body) {
+    const oy = getComputedStyle(node).overflowY;
+    if (node.scrollHeight - node.clientHeight > 4 && (oy === "auto" || oy === "scroll")) {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return window;
+}
+
 // Leading + trailing throttle via setTimeout (no rAF — must work even
 // when the tab's render pipeline is paused).
 function onRevealScroll() {
@@ -510,7 +525,96 @@ function CapabilitiesSection() {
   );
 }
 
+/* Journey timeline — a video-editor's scrubber. A playhead scrubs down the
+   spine as you scroll; each year is a keyframe that lights up when the
+   playhead passes it, and goes dark again when you scrub back up. */
+function useTimeline(count: number) {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLDivElement>(null);
+  const playheadRef = useRef<HTMLDivElement>(null);
+  const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [active, setActive] = useState<boolean[]>(() => new Array(count).fill(false));
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    // Reduced motion: show everything, fill the spine, skip the listener.
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setActive(new Array(count).fill(true));
+      if (fillRef.current) fillRef.current.style.height = "100%";
+      return;
+    }
+
+    // Direct DOM writes drive the high-frequency scrubber (no re-render);
+    // node booleans only toggle on threshold crossings (rare → setState ok,
+    // and identity is preserved when nothing changed so we don't re-render).
+    const update = () => {
+      const vh = window.innerHeight || 800;
+      const threshold = vh * 0.7; // playhead line, 70% down the viewport
+      const rect = section.getBoundingClientRect();
+      const passed = threshold - rect.top;
+      const h = Math.max(0, Math.min(rect.height, passed));
+      if (fillRef.current) fillRef.current.style.height = `${h}px`;
+      const ph = playheadRef.current;
+      if (ph) {
+        ph.style.transform = `translateY(${h}px)`;
+        ph.style.opacity = passed > 0 && passed < rect.height ? "1" : "0";
+      }
+      setActive(prev => {
+        let copy: boolean[] | null = null;
+        for (let i = 0; i < nodeRefs.current.length; i++) {
+          const el = nodeRefs.current[i];
+          if (!el) continue;
+          const on = el.getBoundingClientRect().top < threshold;
+          if (on !== prev[i]) {
+            if (!copy) copy = prev.slice();
+            copy[i] = on;
+          }
+        }
+        return copy ?? prev;
+      });
+    };
+
+    // Leading-edge, ~60fps time throttle — cheaper and more reliable than
+    // rAF inside a backgrounded preview frame (passive: no scroll blocking).
+    let last = 0;
+    const onScroll = () => {
+      const now = Date.now();
+      if (now - last < 16) return;
+      last = now;
+      update();
+    };
+
+    const target = getScrollParent(section);
+    target.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    update(); // initial sync
+    return () => {
+      target.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [count]);
+
+  return { sectionRef, fillRef, playheadRef, nodeRefs, active };
+}
+
+function TimelineNode({ entry, active, nodeRef }: {
+  entry: typeof JOURNEY[number];
+  active: boolean;
+  nodeRef: (el: HTMLDivElement | null) => void;
+}) {
+  return (
+    <div ref={nodeRef} className="pf-tl-node" data-active={active || undefined}>
+      <div className="pf-tl-year" style={{ fontFamily: "var(--font-mono)" }}>{entry.year}</div>
+      <div className="pf-tl-title" style={{ fontFamily: "var(--font-mono)" }}>{entry.title}</div>
+      <p className="pf-tl-desc" style={{ fontFamily: "var(--font-body)" }}>{entry.desc}</p>
+    </div>
+  );
+}
+
 function JourneySection() {
+  const { sectionRef, fillRef, playheadRef, nodeRefs, active } = useTimeline(JOURNEY.length);
   return (
     <section style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
       <div className="section-inner">
@@ -523,15 +627,20 @@ function JourneySection() {
           </h2>
         </Reveal>
 
-        <div className="pf-grid-work">
+        <div ref={sectionRef} className="pf-timeline">
+          <div className="pf-tl-spine" aria-hidden>
+            <div ref={fillRef} className="pf-tl-fill" />
+            <div ref={playheadRef} className="pf-tl-playhead">
+              <span className="pf-tl-playhead-tri" />
+            </div>
+          </div>
           {JOURNEY.map((e, i) => (
-            <Reveal key={e.year} delay={i * 120}>
-              <div style={{ borderTop: "2px solid var(--pf-accent)", paddingTop: 22 }}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(36px, 5cqi, 56px)", fontWeight: 700, color: "var(--pf-text)", lineHeight: 1 }}>{e.year}</div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: 15, fontWeight: 700, color: "var(--pf-accent)", marginTop: 14, marginBottom: 8 }}>{e.title}</div>
-                <p style={{ fontFamily: "var(--font-body)", fontSize: 14, lineHeight: 1.65, color: "var(--pf-muted)" }}>{e.desc}</p>
-              </div>
-            </Reveal>
+            <TimelineNode
+              key={e.year}
+              entry={e}
+              active={active[i]}
+              nodeRef={(el) => { nodeRefs.current[i] = el; }}
+            />
           ))}
         </div>
       </div>
