@@ -270,7 +270,7 @@ function HeroSection() {
         {/* Top row: logo + availability */}
         <div className="flex items-center justify-between" style={{ marginBottom: "clamp(40px, 7cqi, 88px)" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/logo-glow.png" alt="Obaida" style={{ width: "clamp(40px, 6cqi, 64px)", height: "auto" }} />
+          <img src="/assets/logo-glow.png" alt="Obaida" style={{ width: "clamp(56px, 8cqi, 92px)", height: "auto" }} />
           <div className="pf-meta flex items-center" style={{ gap: 8 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#5BCE8A", boxShadow: "0 0 8px #5BCE8A" }} />
             Available for work — 2026
