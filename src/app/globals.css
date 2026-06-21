@@ -18,6 +18,12 @@
   font-weight: 400;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Pixelify Sans';
+  src: url('/fonts/PixelifySans.ttf') format('truetype');
+  font-weight: 400 700;
+  font-display: swap;
+}
 
 @theme inline {
   --color-blush-white: #F7F3F2;
@@ -32,6 +38,7 @@
   --font-mono: 'Courier New Custom', 'Courier New', monospace;
   --font-display: 'Cambria Custom', 'Cambria', Georgia, serif;
   --font-body: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+  --font-pixel: 'Pixelify Sans', monospace;
 }
 
 /* Keep the reset in the base layer so Tailwind utility classes

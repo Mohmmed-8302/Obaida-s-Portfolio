@@ -284,17 +284,17 @@ function PortfolioNav() {
       background: "color-mix(in srgb, var(--pf-bg) 85%, transparent)",
       backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
       borderBottom: "1px solid var(--pf-line)",
-      display: "flex", justifyContent: "center", gap: 4,
-      padding: "8px 12px", flexWrap: "wrap",
+      display: "flex", justifyContent: "center", gap: 6,
+      padding: "8px 16px", flexWrap: "wrap",
     }}>
       {NAV_LINKS.map((l) => (
         <button key={l.to} onClick={() => go(l.to)} style={{
           background: active === l.to ? "var(--pf-accent)" : "transparent",
           color: active === l.to ? "#fff" : "var(--pf-muted)",
-          border: "none", borderRadius: 4,
-          padding: "4px 10px", cursor: "pointer",
-          fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
-          letterSpacing: "0.06em", textTransform: "uppercase",
+          border: "none", borderRadius: 9999,
+          padding: "5px 16px", cursor: "pointer",
+          fontFamily: "var(--font-pixel)", fontSize: 13, fontWeight: 600,
+          letterSpacing: "0.05em", textTransform: "uppercase",
           transition: "background .2s, color .2s",
         }}>
           {l.label}
