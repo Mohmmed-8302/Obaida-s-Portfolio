@@ -289,10 +289,10 @@ function PortfolioNav() {
     }}>
       {NAV_LINKS.map((l) => (
         <button key={l.to} onClick={() => go(l.to)} style={{
-          background: active === l.to ? "var(--pf-accent)" : "transparent",
-          color: active === l.to ? "#fff" : "var(--pf-muted)",
+          background: active === l.to ? "var(--pf-accent)" : "#1a1a2e",
+          color: active === l.to ? "#fff" : "rgba(255,255,255,0.7)",
           border: "none", borderRadius: 9999,
-          padding: "5px 16px", cursor: "pointer",
+          padding: "6px 18px", cursor: "pointer",
           fontFamily: "var(--font-pixel)", fontSize: 13, fontWeight: 600,
           letterSpacing: "0.05em", textTransform: "uppercase",
           transition: "background .2s, color .2s",
