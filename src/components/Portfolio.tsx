@@ -18,21 +18,25 @@ const MARQUEE_ITEMS = [
   "Awareness Content", "Education Content", "Viral Hooks",
 ];
 
+const YT_CHANNEL = "https://youtube.com/@festeara-24";
 const WORK = [
   {
     num: "01", tag: "Gaming", title: "Viral Gaming Edits",
     meta: "FX · Pacing · Hooks", dur: "0:47",
     desc: "High-energy edits engineered to survive the first three seconds.",
+    url: YT_CHANNEL,
   },
   {
     num: "02", tag: "Education", title: "Education That Lands",
     meta: "Clarity · Retention · Story", dur: "1:23",
     desc: "Complex ideas cut down to the moments people actually remember.",
+    url: YT_CHANNEL,
   },
   {
     num: "03", tag: "Awareness", title: "Awareness Clips",
     meta: "Emotion · Message · Impact", dur: "2:15",
     desc: "Message-first storytelling with not a single wasted second.",
+    url: YT_CHANNEL,
   },
 ];
 
@@ -64,9 +68,9 @@ const JOURNEY = [
 ];
 
 const CONTACT_DETAILS = [
-  { label: "Email", value: "technecal23@gmail.com" },
-  { label: "Phone", value: "+966 56 620 7480" },
-  { label: "YouTube", value: "@festeara-24 / Obaida" },
+  { label: "Email", value: "technecal23@gmail.com", href: "mailto:technecal23@gmail.com" },
+  { label: "Phone", value: "+966 56 620 7480", href: "tel:+966566207480" },
+  { label: "YouTube", value: "@festeara-24 / Obaida", href: "https://youtube.com/@festeara-24", external: true },
 ];
 
 const EMAIL = "technecal23@gmail.com";
@@ -240,6 +244,67 @@ function PixelButton({ children, href, onClick, accent }: {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Sticky Nav
+   ═══════════════════════════════════════════════════════════════ */
+
+const NAV_LINKS = [
+  { label: "Home", to: "hero" },
+  { label: "Studio", to: "studio" },
+  { label: "Work", to: "work" },
+  { label: "Videos", to: "videos" },
+  { label: "Skills", to: "skills" },
+  { label: "Journey", to: "journey" },
+  { label: "Contact", to: "contact" },
+];
+
+function PortfolioNav() {
+  const [active, setActive] = useState("hero");
+
+  useEffect(() => {
+    const ids = NAV_LINKS.map((l) => l.to);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) { setActive(e.target.id); break; }
+        }
+      },
+      { rootMargin: "-30% 0px -60% 0px", threshold: 0 },
+    );
+    ids.forEach((id) => { const el = document.getElementById(id); if (el) observer.observe(el); });
+    return () => observer.disconnect();
+  }, []);
+
+  const go = useCallback((id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  return (
+    <nav style={{
+      position: "sticky", top: 0, zIndex: 50,
+      background: "color-mix(in srgb, var(--pf-bg) 85%, transparent)",
+      backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+      borderBottom: "1px solid var(--pf-line)",
+      display: "flex", justifyContent: "center", gap: 4,
+      padding: "8px 12px", flexWrap: "wrap",
+    }}>
+      {NAV_LINKS.map((l) => (
+        <button key={l.to} onClick={() => go(l.to)} style={{
+          background: active === l.to ? "var(--pf-accent)" : "transparent",
+          color: active === l.to ? "#fff" : "var(--pf-muted)",
+          border: "none", borderRadius: 4,
+          padding: "4px 10px", cursor: "pointer",
+          fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
+          letterSpacing: "0.06em", textTransform: "uppercase",
+          transition: "background .2s, color .2s",
+        }}>
+          {l.label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Sections
    ═══════════════════════════════════════════════════════════════ */
 
@@ -252,7 +317,7 @@ function HeroSection() {
   }, []);
 
   return (
-    <section className="pf-hero relative overflow-hidden" style={{ background: "var(--pf-bg)" }}>
+    <section id="hero" className="pf-hero relative overflow-hidden" style={{ background: "var(--pf-bg)" }}>
       {/* Layered background: faint grid + rose glow */}
       <div className="absolute inset-0 pointer-events-none" style={{
         backgroundImage:
@@ -345,7 +410,7 @@ function MarqueeSection() {
 
 function AboutSection() {
   return (
-    <section style={{ background: "var(--pf-bg)" }}>
+    <section id="studio" style={{ background: "var(--pf-bg)" }}>
       <div className="section-inner">
         <div className="pf-grid-2">
           <Reveal>
@@ -379,6 +444,7 @@ function AboutSection() {
 function WorkCard({ item, delay }: { item: typeof WORK[number]; delay: number }) {
   return (
     <Reveal delay={delay}>
+      <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
       <article className="pf-card h-full" style={{ display: "flex", flexDirection: "column" }}>
         {/* Media */}
         <div className="pf-media" style={{ aspectRatio: "4 / 3", background: "var(--pf-bg)", borderBottom: "1px solid var(--pf-line)" }}>
@@ -419,6 +485,7 @@ function WorkCard({ item, delay }: { item: typeof WORK[number]; delay: number })
           <div className="pf-meta">{item.meta}</div>
         </div>
       </article>
+      </a>
     </Reveal>
   );
 }
@@ -453,12 +520,27 @@ function WorkSection() {
 
 function VideoCard({ video, delay }: { video: typeof VIDEOS[number]; delay: number }) {
   const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
   const vidRef = useRef<HTMLVideoElement>(null);
   const toggle = useCallback(() => {
     const v = vidRef.current;
     if (!v) return;
-    if (v.paused) { v.play(); setPlaying(true); }
+    if (v.paused) { v.muted = true; v.play(); setPlaying(true); setMuted(true); }
     else { v.pause(); setPlaying(false); }
+  }, []);
+  const toggleMute = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const v = vidRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setMuted(v.muted);
+  }, []);
+  const goFullscreen = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    vidRef.current?.requestFullscreen?.();
+  }, []);
+  const seekThumb = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    e.currentTarget.currentTime = 0.5;
   }, []);
   return (
     <Reveal delay={delay}>
@@ -471,12 +553,14 @@ function VideoCard({ video, delay }: { video: typeof VIDEOS[number]; delay: numb
             ref={vidRef}
             src={video.src}
             loop
+            muted
             playsInline
             preload="metadata"
+            onLoadedMetadata={seekThumb}
             onEnded={() => setPlaying(false)}
             style={{ width: "100%", display: "block", aspectRatio: "9/16", objectFit: "cover", background: "#000" }}
           />
-          {!playing && (
+          {!playing ? (
             <div style={{
               position: "absolute", inset: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -493,6 +577,19 @@ function VideoCard({ video, delay }: { video: typeof VIDEOS[number]; delay: numb
                   borderTop: "10px solid transparent", borderBottom: "10px solid transparent",
                 }} />
               </div>
+            </div>
+          ) : (
+            <div style={{ position: "absolute", bottom: 8, right: 8, display: "flex", gap: 6 }}>
+              <button onClick={toggleMute} style={{
+                width: 30, height: 30, borderRadius: "50%", border: "none",
+                background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 14, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>{muted ? "🔇" : "🔊"}</button>
+              <button onClick={goFullscreen} style={{
+                width: 30, height: 30, borderRadius: "50%", border: "none",
+                background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 13, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>⛶</button>
             </div>
           )}
         </div>
@@ -557,7 +654,7 @@ function CapabilityBar({ label, value, delay }: { label: string; value: number; 
 
 function CapabilitiesSection() {
   return (
-    <section style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
+    <section id="skills" style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
       <div className="section-inner">
         <Reveal>
           <SectionLabel index="04" total="06" label="Capabilities" />
@@ -693,7 +790,7 @@ function TimelineNode({ entry, active, nodeRef }: {
 function JourneySection() {
   const { sectionRef, fillRef, playheadRef, nodeRefs, active } = useTimeline(JOURNEY.length);
   return (
-    <section style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
+    <section id="journey" style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
       <div className="section-inner">
         <Reveal>
           <SectionLabel index="05" total="06" label="Journey" />
@@ -755,7 +852,11 @@ function ContactSection() {
               <Reveal key={c.label} delay={300 + i * 80}>
                 <div>
                   <div className="pf-meta" style={{ marginBottom: 6 }}>{c.label}</div>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--pf-text)", wordBreak: "break-word" }}>{c.value}</div>
+                  {c.href ? (
+                    <a href={c.href} {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})} style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--pf-accent)", wordBreak: "break-word", textDecoration: "underline" }}>{c.value}</a>
+                  ) : (
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--pf-text)", wordBreak: "break-word" }}>{c.value}</div>
+                  )}
                 </div>
               </Reveal>
             ))}
@@ -805,6 +906,7 @@ export default function Portfolio() {
       containerType: "inline-size",
     }}>
       <HeroSection />
+      <PortfolioNav />
       <MarqueeSection />
       <AboutSection />
       <WorkSection />

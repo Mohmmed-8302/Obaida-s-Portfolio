@@ -202,10 +202,8 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
       openCount.current += 1;
       zCounter.current += 1;
       const id = `${appId}-${Date.now()}`;
-      const defaultRect: Rect = { x, y, w, h };
-      const startMaximized = appId === "ie";
-      const rect: Rect = startMaximized ? { x: 0, y: 0, w: vw, h: vh - TASKBAR_HEIGHT } : defaultRect;
-      const inst: WindowInstance = { id, appId, title, minimized: false, maximized: startMaximized, rect, prevRect: defaultRect, z: zCounter.current };
+      const rect: Rect = { x, y, w, h };
+      const inst: WindowInstance = { id, appId, title, minimized: false, maximized: false, rect, prevRect: rect, z: zCounter.current };
       setActiveId(id);
       play("open");
       return [...ws, inst];

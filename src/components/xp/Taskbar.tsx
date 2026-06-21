@@ -23,7 +23,7 @@ export const TASKBAR_HEIGHT = 30;
 export default function Taskbar({ windows, activeId, startOpen, settings, updateSettings, onStartClick, onTaskClick, onOpenApp, onShowDesktop }: TaskbarProps) {
   const [time, setTime] = useState("");
   const [now, setNow] = useState(() => new Date());
-  const [tray, setTray] = useState<null | "clock" | "volume">(null);
+  const [tray, setTray] = useState<null | "clock" | "volume" | "network">(null);
   const [pinMenu, setPinMenu] = useState<null | { x: number; pin?: Pin }>(null);
   const [addOpen, setAddOpen] = useState(false);
   const pins = usePins();
@@ -145,7 +145,7 @@ export default function Taskbar({ windows, activeId, startOpen, settings, update
               <svg width="14" height="14" viewBox="0 0 16 16"><path d="M2 6 H5 L9 3 V13 L5 10 H2 Z" fill="#fff" /><path d="M11 5 a4 4 0 0 1 0 6" stroke="#fff" strokeWidth="1.3" fill="none" /></svg>
             )}
           </TrayIcon>
-          <TrayIcon title="Network">
+          <TrayIcon title="Network" onClick={() => setTray((t) => (t === "network" ? null : "network"))}>
             <svg width="14" height="14" viewBox="0 0 16 16"><rect x="2" y="9" width="5" height="4" fill="#cfe6ff" stroke="#fff" strokeWidth="0.6" /><rect x="9" y="4" width="5" height="4" fill="#cfe6ff" stroke="#fff" strokeWidth="0.6" /><path d="M6 11 L9 6" stroke="#fff" strokeWidth="0.8" /></svg>
           </TrayIcon>
           <button
@@ -162,6 +162,7 @@ export default function Taskbar({ windows, activeId, startOpen, settings, update
       {tray === "volume" && (
         <VolumePopup settings={settings} updateSettings={updateSettings} onMouseDown={(e) => e.stopPropagation()} />
       )}
+      {tray === "network" && <NetworkPopup onMouseDown={(e) => e.stopPropagation()} />}
 
       {/* Quick Launch context menu */}
       {pinMenu && (
@@ -252,6 +253,28 @@ function VolumePopup({ settings, updateSettings, onMouseDown }: { settings: XpSe
       <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, justifyContent: "center", cursor: "pointer", color: "#222" }}>
         <input type="checkbox" checked={settings.muted} onChange={(e) => updateSettings({ muted: e.target.checked })} /> Mute
       </label>
+    </div>
+  );
+}
+
+function NetworkPopup({ onMouseDown }: { onMouseDown: (e: React.MouseEvent) => void }) {
+  return (
+    <div className="absolute" onMouseDown={onMouseDown} style={{ right: 6, bottom: TASKBAR_HEIGHT + 6, zIndex: 130, width: 220, background: "#ece9d8", border: "1px solid #0831a8", borderRadius: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.4)", fontFamily: "Tahoma, sans-serif", overflow: "hidden" }}>
+      <div style={{ background: "var(--xp-menu-header,#1f60db)", color: "#fff", padding: "6px 10px", fontSize: 12, fontWeight: 700 }}>Network Connection</div>
+      <div style={{ padding: 10, fontSize: 11, color: "#222" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+          <svg width="20" height="20" viewBox="0 0 16 16"><rect x="2" y="9" width="5" height="4" fill="#4caf50" stroke="#2e7d32" strokeWidth="0.6" /><rect x="9" y="4" width="5" height="4" fill="#4caf50" stroke="#2e7d32" strokeWidth="0.6" /><path d="M6 11 L9 6" stroke="#2e7d32" strokeWidth="0.8" /></svg>
+          <div>
+            <div style={{ fontWeight: 700 }}>Local Area Connection</div>
+            <div style={{ fontSize: 10, color: "#555" }}>Connected</div>
+          </div>
+        </div>
+        <div style={{ borderTop: "1px solid #c0c0c0", paddingTop: 8, display: "grid", gridTemplateColumns: "auto 1fr", gap: "3px 12px", fontSize: 10, color: "#444" }}>
+          <span>Speed:</span><span>100.0 Mbps</span>
+          <span>Status:</span><span style={{ color: "#2e7d32" }}>Connected</span>
+          <span>Packets:</span><span>Sent 42,069 / Received 69,420</span>
+        </div>
+      </div>
     </div>
   );
 }
