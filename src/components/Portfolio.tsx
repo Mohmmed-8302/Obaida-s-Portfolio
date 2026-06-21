@@ -250,10 +250,10 @@ function PixelButton({ children, href, onClick, accent }: {
 const NAV_LINKS = [
   { label: "Home", to: "hero" },
   { label: "Studio", to: "studio" },
+  { label: "Journey", to: "journey" },
   { label: "Work", to: "work" },
   { label: "Videos", to: "videos" },
   { label: "Skills", to: "skills" },
-  { label: "Journey", to: "journey" },
   { label: "Contact", to: "contact" },
 ];
 
@@ -497,7 +497,7 @@ function WorkSection() {
         <div className="flex flex-wrap items-end justify-between" style={{ gap: 20, marginBottom: "clamp(36px, 5cqi, 64px)" }}>
           <div>
             <Reveal>
-              <SectionLabel index="02" total="06" label="Selected Work" />
+              <SectionLabel index="03" total="06" label="Selected Work" />
             </Reveal>
             <Reveal delay={120}>
               <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18 }}>
@@ -612,7 +612,7 @@ function VideosSection() {
         <div className="flex flex-wrap items-end justify-between" style={{ gap: 20, marginBottom: "clamp(36px, 5cqi, 64px)" }}>
           <div>
             <Reveal>
-              <SectionLabel index="03" total="06" label="Videos" />
+              <SectionLabel index="04" total="06" label="Videos" />
             </Reveal>
             <Reveal delay={120}>
               <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18 }}>
@@ -657,7 +657,7 @@ function CapabilitiesSection() {
     <section id="skills" style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
       <div className="section-inner">
         <Reveal>
-          <SectionLabel index="04" total="06" label="Capabilities" />
+          <SectionLabel index="05" total="06" label="Capabilities" />
         </Reveal>
         <Reveal delay={120}>
           <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18, marginBottom: "clamp(36px, 5cqi, 60px)" }}>
@@ -793,7 +793,7 @@ function JourneySection() {
     <section id="journey" style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
       <div className="section-inner">
         <Reveal>
-          <SectionLabel index="05" total="06" label="Journey" />
+          <SectionLabel index="02" total="06" label="Journey" />
         </Reveal>
         <Reveal delay={120}>
           <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18, marginBottom: "clamp(36px, 5cqi, 64px)" }}>
@@ -909,10 +909,10 @@ export default function Portfolio() {
       <PortfolioNav />
       <MarqueeSection />
       <AboutSection />
+      <JourneySection />
       <WorkSection />
       <VideosSection />
       <CapabilitiesSection />
-      <JourneySection />
       <ContactSection />
       <FooterSection />
     </div>
