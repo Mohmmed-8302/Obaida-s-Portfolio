@@ -36,6 +36,13 @@ const WORK = [
   },
 ];
 
+const VIDEOS = [
+  { src: "/videos/lost-hadiths.mp4", title: "أحاديث ضيعة", tag: "Awareness" },
+  { src: "/videos/rich-buy-poor-sell.mp4", title: "حاجة بيشتريها الأغنياء", tag: "Education" },
+  { src: "/videos/major-minor-sins.mp4", title: "الكبائر و الصغائر", tag: "Awareness" },
+  { src: "/videos/spiderman-yemen.mp4", title: "سبيدرمان اليمن", tag: "Entertainment" },
+];
+
 const CAPABILITIES = [
   { label: "Video Editing", value: 90 },
   { label: "Motion Graphics", value: 82 },
@@ -342,7 +349,7 @@ function AboutSection() {
       <div className="section-inner">
         <div className="pf-grid-2">
           <Reveal>
-            <SectionLabel index="01" total="05" label="Studio" />
+            <SectionLabel index="01" total="06" label="Studio" />
           </Reveal>
           <div>
             <Reveal delay={120}>
@@ -423,7 +430,7 @@ function WorkSection() {
         <div className="flex flex-wrap items-end justify-between" style={{ gap: 20, marginBottom: "clamp(36px, 5cqi, 64px)" }}>
           <div>
             <Reveal>
-              <SectionLabel index="02" total="05" label="Selected Work" />
+              <SectionLabel index="02" total="06" label="Selected Work" />
             </Reveal>
             <Reveal delay={120}>
               <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18 }}>
@@ -438,6 +445,95 @@ function WorkSection() {
 
         <div className="pf-grid-work">
           {WORK.map((item, i) => <WorkCard key={item.num} item={item} delay={i * 120} />)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function VideoCard({ video, delay }: { video: typeof VIDEOS[number]; delay: number }) {
+  const [playing, setPlaying] = useState(false);
+  const vidRef = useRef<HTMLVideoElement>(null);
+  const toggle = useCallback(() => {
+    const v = vidRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); }
+    else { v.pause(); setPlaying(false); }
+  }, []);
+  return (
+    <Reveal delay={delay}>
+      <div style={{
+        background: "#111", border: "1px solid var(--pf-line)",
+        overflow: "hidden", position: "relative",
+      }}>
+        <div style={{ position: "relative", cursor: "pointer" }} onClick={toggle}>
+          <video
+            ref={vidRef}
+            src={video.src}
+            loop
+            playsInline
+            preload="metadata"
+            onEnded={() => setPlaying(false)}
+            style={{ width: "100%", display: "block", aspectRatio: "9/16", objectFit: "cover", background: "#000" }}
+          />
+          {!playing && (
+            <div style={{
+              position: "absolute", inset: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: "rgba(0,0,0,0.35)",
+            }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: "50%",
+                background: "rgba(0,0,0,0.6)", border: "2px solid rgba(255,255,255,0.8)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <span style={{
+                  width: 0, height: 0, marginLeft: 4,
+                  borderLeft: "16px solid #fff",
+                  borderTop: "10px solid transparent", borderBottom: "10px solid transparent",
+                }} />
+              </div>
+            </div>
+          )}
+        </div>
+        <div style={{ padding: "14px 16px" }}>
+          <div className="pf-meta" style={{ color: "var(--pf-accent)", marginBottom: 6 }}>{video.tag}</div>
+          <div style={{
+            fontFamily: "var(--font-mono)", fontSize: 15, fontWeight: 700,
+            color: "var(--pf-text)", direction: "rtl",
+          }}>{video.title}</div>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+function VideosSection() {
+  return (
+    <section id="videos" style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
+      <div className="section-inner">
+        <div className="flex flex-wrap items-end justify-between" style={{ gap: 20, marginBottom: "clamp(36px, 5cqi, 64px)" }}>
+          <div>
+            <Reveal>
+              <SectionLabel index="03" total="06" label="Videos" />
+            </Reveal>
+            <Reveal delay={120}>
+              <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18 }}>
+                Video Edits
+              </h2>
+            </Reveal>
+          </div>
+          <Reveal delay={240}>
+            <span className="pf-meta">Short-form · engineered to hold</span>
+          </Reveal>
+        </div>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+          gap: "clamp(16px, 2.5cqi, 28px)",
+        }}>
+          {VIDEOS.map((v, i) => <VideoCard key={v.src} video={v} delay={i * 120} />)}
         </div>
       </div>
     </section>
@@ -464,7 +560,7 @@ function CapabilitiesSection() {
     <section style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
       <div className="section-inner">
         <Reveal>
-          <SectionLabel index="03" total="05" label="Capabilities" />
+          <SectionLabel index="04" total="06" label="Capabilities" />
         </Reveal>
         <Reveal delay={120}>
           <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18, marginBottom: "clamp(36px, 5cqi, 60px)" }}>
@@ -600,7 +696,7 @@ function JourneySection() {
     <section style={{ background: "var(--pf-bg)", borderTop: "1px solid var(--pf-line)" }}>
       <div className="section-inner">
         <Reveal>
-          <SectionLabel index="04" total="05" label="Journey" />
+          <SectionLabel index="05" total="06" label="Journey" />
         </Reveal>
         <Reveal delay={120}>
           <h2 className="pf-h2" style={{ color: "var(--pf-text)", marginTop: 18, marginBottom: "clamp(36px, 5cqi, 64px)" }}>
@@ -638,7 +734,7 @@ function ContactSection() {
       }} />
       <div className="section-inner relative">
         <Reveal>
-          <SectionLabel index="05" total="05" label="Contact" />
+          <SectionLabel index="06" total="06" label="Contact" />
         </Reveal>
         <Reveal delay={120}>
           <h2 className="pf-h2" style={{ color: "var(--pf-text)", margin: "24px 0 36px" }}>
@@ -712,6 +808,7 @@ export default function Portfolio() {
       <MarqueeSection />
       <AboutSection />
       <WorkSection />
+      <VideosSection />
       <CapabilitiesSection />
       <JourneySection />
       <ContactSection />
