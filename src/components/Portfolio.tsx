@@ -189,51 +189,45 @@ function SectionLabel({ index, total, label }: { index: string; total: string; l
   );
 }
 
-function MagneticButton({ children, href, onClick }: {
-  children: React.ReactNode; href?: string; onClick?: () => void;
-}) {
-  const btnRef = useRef<HTMLElement>(null);
-  const [pressed, setPressed] = useState(false);
-  const onMove = useCallback((e: React.MouseEvent) => {
-    const el = btnRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const x = ((e.clientX - r.left - r.width / 2) / (r.width / 2)) * 6;
-    const y = ((e.clientY - r.top - r.height / 2) / (r.height / 2)) * 6;
-    el.style.transform = `translate(${x}px, ${y}px)`;
-  }, []);
-  const onLeave = useCallback(() => {
-    const el = btnRef.current;
-    if (el) el.style.transform = "";
-    setPressed(false);
-  }, []);
+const PIXEL_BTN: React.CSSProperties = {
+  fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700,
+  textTransform: "uppercase", letterSpacing: "0.14em",
+  padding: "10px 24px",
+  cursor: "pointer", borderRadius: 0,
+  display: "inline-flex", alignItems: "center", gap: 10,
+  textDecoration: "none", whiteSpace: "nowrap",
+  background: "#c0c0c0", color: "#000",
+  imageRendering: "pixelated",
+  borderTop: "2px solid #fff",
+  borderLeft: "2px solid #fff",
+  borderBottom: "2px solid #404040",
+  borderRight: "2px solid #404040",
+  boxShadow: "1px 1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #808080",
+  textShadow: "none",
+  outline: "1px solid #000",
+};
+const PIXEL_BTN_PRESSED: React.CSSProperties = {
+  ...PIXEL_BTN,
+  borderTop: "2px solid #404040",
+  borderLeft: "2px solid #404040",
+  borderBottom: "2px solid #fff",
+  borderRight: "2px solid #fff",
+  boxShadow: "1px 1px 0 #000, inset 1px 1px 0 #808080, inset -1px -1px 0 #dfdfdf",
+  padding: "11px 23px 9px 25px",
+};
 
-  const style: React.CSSProperties = {
-    fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700,
-    textTransform: "uppercase", letterSpacing: "0.14em",
-    padding: pressed ? "14px 28px 12px 30px" : "12px 30px 14px 28px",
-    cursor: "pointer", borderRadius: 0,
-    display: "inline-flex", alignItems: "center", gap: 10,
-    textDecoration: "none", whiteSpace: "nowrap",
-    background: "var(--pf-accent)", color: "#0B0D11",
-    borderTop: pressed ? "3px solid #6B2A3A" : "3px solid #E8B0BF",
-    borderLeft: pressed ? "3px solid #6B2A3A" : "3px solid #E8B0BF",
-    borderBottom: pressed ? "3px solid #E8B0BF" : "3px solid #6B2A3A",
-    borderRight: pressed ? "3px solid #E8B0BF" : "3px solid #6B2A3A",
-    boxShadow: pressed
-      ? "inset 1px 1px 3px rgba(0,0,0,0.3)"
-      : "2px 3px 0px #000, inset 0 1px 0 rgba(255,255,255,0.15)",
-    imageRendering: "pixelated",
-    transition: "transform .2s cubic-bezier(.22,.61,.36,1)",
-    textShadow: "1px 1px 0 rgba(255,255,255,0.2)",
-  };
+function PixelButton({ children, href, onClick, accent }: {
+  children: React.ReactNode; href?: string; onClick?: () => void; accent?: boolean;
+}) {
+  const [pressed, setPressed] = useState(false);
+  const base = accent
+    ? { ...(pressed ? PIXEL_BTN_PRESSED : PIXEL_BTN), background: "#c0c0c0", color: "#000" }
+    : pressed ? PIXEL_BTN_PRESSED : PIXEL_BTN;
   const Tag = (href ? "a" : "button") as "a";
   return (
-    <Tag ref={btnRef as never} style={style} href={href} onClick={onClick}
-      onMouseMove={onMove} onMouseLeave={onLeave}
-      onMouseDown={() => setPressed(true)} onMouseUp={() => setPressed(false)}>
+    <Tag style={base} href={href} onClick={onClick}
+      onMouseDown={() => setPressed(true)} onMouseUp={() => setPressed(false)} onMouseLeave={() => setPressed(false)}>
       {children}
-      <span aria-hidden style={{ fontSize: 15 }}>→</span>
     </Tag>
   );
 }
@@ -297,21 +291,8 @@ function HeroSection() {
 
         <Reveal delay={360}>
           <div className="flex flex-wrap items-center" style={{ gap: 20 }}>
-            <MagneticButton onClick={goWork}>View Selected Work</MagneticButton>
-            <button onClick={goContact} className="pf-link" style={{
-              background: "var(--pf-bg)", cursor: "pointer",
-              fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700,
-              textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--pf-text)",
-              padding: "12px 24px",
-              borderTop: "3px solid var(--pf-line-strong)",
-              borderLeft: "3px solid var(--pf-line-strong)",
-              borderBottom: "3px solid #000",
-              borderRight: "3px solid #000",
-              boxShadow: "2px 3px 0px #000",
-              textShadow: "1px 1px 0 rgba(0,0,0,0.3)",
-            }}>
-              Get in touch
-            </button>
+            <PixelButton onClick={goWork} accent>View Selected Work →</PixelButton>
+            <PixelButton onClick={goContact}>Get in touch</PixelButton>
           </div>
         </Reveal>
 
@@ -684,7 +665,7 @@ function ContactSection() {
             ))}
           </div>
           <Reveal delay={540}>
-            <MagneticButton href={`mailto:${EMAIL}`}>Start a Project</MagneticButton>
+            <PixelButton href={`mailto:${EMAIL}`} accent>Start a Project →</PixelButton>
           </Reveal>
         </div>
       </div>
@@ -703,17 +684,7 @@ function FooterSection() {
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(28px, 5cqi, 52px)", fontWeight: 700, color: "var(--pf-text)" }}>
             Obaida<span style={{ color: "var(--pf-accent)" }}>.</span>
           </div>
-          <button onClick={toTop} className="pf-meta" style={{
-            background: "var(--pf-bg)", cursor: "pointer",
-            padding: "12px 18px", color: "var(--pf-muted)", display: "inline-flex", alignItems: "center", gap: 8,
-            borderTop: "3px solid var(--pf-line-strong)",
-            borderLeft: "3px solid var(--pf-line-strong)",
-            borderBottom: "3px solid #000",
-            borderRight: "3px solid #000",
-            boxShadow: "2px 3px 0px #000",
-          }}>
-            Back to top <span aria-hidden>↑</span>
-          </button>
+          <PixelButton onClick={toTop}>Back to top ↑</PixelButton>
         </div>
         <div className="flex flex-wrap items-center justify-between" style={{
           gap: 16, paddingTop: 24, borderTop: "1px solid var(--pf-line)",
