@@ -200,44 +200,27 @@ function SectionLabel({ index, total, label }: { index: string; total: string; l
   );
 }
 
-const PIXEL_BTN: React.CSSProperties = {
-  fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700,
-  textTransform: "uppercase", letterSpacing: "0.14em",
-  padding: "10px 24px",
-  cursor: "pointer", borderRadius: 0,
+const PILL_BTN: React.CSSProperties = {
+  fontFamily: "var(--font-pixel)", fontSize: 13, fontWeight: 600,
+  textTransform: "uppercase", letterSpacing: "0.05em",
+  padding: "10px 28px",
+  cursor: "pointer", borderRadius: 9999,
   display: "inline-flex", alignItems: "center", gap: 10,
   textDecoration: "none", whiteSpace: "nowrap",
-  background: "#c0c0c0", color: "#000",
-  imageRendering: "pixelated",
-  borderTop: "2px solid #fff",
-  borderLeft: "2px solid #fff",
-  borderBottom: "2px solid #404040",
-  borderRight: "2px solid #404040",
-  boxShadow: "1px 1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #808080",
-  textShadow: "none",
-  outline: "1px solid #000",
-};
-const PIXEL_BTN_PRESSED: React.CSSProperties = {
-  ...PIXEL_BTN,
-  borderTop: "2px solid #404040",
-  borderLeft: "2px solid #404040",
-  borderBottom: "2px solid #fff",
-  borderRight: "2px solid #fff",
-  boxShadow: "1px 1px 0 #000, inset 1px 1px 0 #808080, inset -1px -1px 0 #dfdfdf",
-  padding: "11px 23px 9px 25px",
+  background: "#1a1a2e", color: "rgba(255,255,255,0.7)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  transition: "background .2s, color .2s, border-color .2s",
 };
 
 function PixelButton({ children, href, onClick, accent }: {
   children: React.ReactNode; href?: string; onClick?: () => void; accent?: boolean;
 }) {
-  const [pressed, setPressed] = useState(false);
-  const base = accent
-    ? { ...(pressed ? PIXEL_BTN_PRESSED : PIXEL_BTN), background: "#c0c0c0", color: "#000" }
-    : pressed ? PIXEL_BTN_PRESSED : PIXEL_BTN;
+  const base: React.CSSProperties = accent
+    ? { ...PILL_BTN, background: "var(--pf-accent)", color: "#fff", border: "1px solid var(--pf-accent)" }
+    : PILL_BTN;
   const Tag = (href ? "a" : "button") as "a";
   return (
-    <Tag style={base} href={href} onClick={onClick}
-      onMouseDown={() => setPressed(true)} onMouseUp={() => setPressed(false)} onMouseLeave={() => setPressed(false)}>
+    <Tag style={base} href={href} onClick={onClick}>
       {children}
     </Tag>
   );
