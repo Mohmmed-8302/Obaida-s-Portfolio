@@ -80,15 +80,26 @@ body {
   border: 1px solid #3a4a3a;
 }
 
-/* XP scrollbar (for desktop mode) */
-::-webkit-scrollbar { width: 16px; }
-::-webkit-scrollbar-track { background: #ece9d8; }
+/* Default dark scrollbar */
+::-webkit-scrollbar { width: 12px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
 ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #2a3a2a, #1a2a1a);
+  border: 1px solid #3a4a3a;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #3a4a3a, #2a3a2a);
+}
+
+/* XP scrollbar (scoped to XP desktop containers) */
+.xp-scrollbar::-webkit-scrollbar { width: 16px; }
+.xp-scrollbar::-webkit-scrollbar-track { background: #ece9d8; }
+.xp-scrollbar::-webkit-scrollbar-thumb {
   background: linear-gradient(to right, #bbb8a8, #d6d2c2, #bbb8a8);
   border: 1px solid #9a978a;
   border-radius: 0;
 }
-::-webkit-scrollbar-button { display: block; height: 16px; background: #ece9d8; border: 1px solid #9a978a; }
+.xp-scrollbar::-webkit-scrollbar-button { display: block; height: 16px; background: #ece9d8; border: 1px solid #9a978a; }
 
 /* ═══════════════════════════════════════════════════════════════
    ANIMATIONS
