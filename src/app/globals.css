@@ -179,7 +179,7 @@ body {
 .scroll-indicator {
   width: 20px;
   height: 32px;
-  border: 2px solid rgba(120,210,120,0.3);
+  border: 2px solid rgba(201,122,138,0.3);
   border-radius: 10px;
   display: flex;
   justify-content: center;
@@ -188,7 +188,7 @@ body {
 .scroll-indicator-dot {
   width: 3px;
   height: 8px;
-  background: rgba(120,210,120,0.5);
+  background: rgba(201,122,138,0.5);
   border-radius: 2px;
   animation: scrollBounce 1.8s ease infinite;
 }
@@ -754,7 +754,7 @@ body {
 
 .retro-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #2a5a1a, var(--retro-green));
+  background: linear-gradient(90deg, rgba(201, 122, 138, 0.35), var(--retro-green));
   box-shadow: 0 0 6px rgba(201, 122, 138, 0.3);
   transition: width 1.2s cubic-bezier(0.22, 0.61, 0.36, 1);
   position: relative;
@@ -890,8 +890,8 @@ body {
   transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
 }
 .retro-link:hover {
-  color: #90ff60;
-  border-color: #90ff60;
+  color: #D9A0AC;
+  border-color: #D9A0AC;
   text-shadow: 0 0 8px rgba(201, 122, 138, 0.4);
 }
 

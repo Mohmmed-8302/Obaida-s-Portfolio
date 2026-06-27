@@ -147,16 +147,16 @@ function RetroButton({ children, href, onClick, variant = "default", size = "md"
       boxShadow: "inset 1px 1px 0 rgba(255,255,255,0.1), 2px 2px 0 #000",
     },
     primary: {
-      background: "linear-gradient(180deg, #5a8a3a 0%, #3a6a2a 40%, #2a5a1a 100%)",
+      background: "linear-gradient(180deg, #b06070 0%, #8a3850 40%, #6e2840 100%)",
       border: "2px solid",
-      borderColor: "#6a9a4a #1a3a0a #1a3a0a #6a9a4a",
-      color: "#d0ffa0",
-      boxShadow: "inset 1px 1px 0 rgba(255,255,255,0.15), 2px 2px 0 #000, 0 0 12px rgba(100,200,60,0.15)",
+      borderColor: "#c07888 #3e1828 #3e1828 #c07888",
+      color: "#ffe4e8",
+      boxShadow: "inset 1px 1px 0 rgba(255,255,255,0.15), 2px 2px 0 #000, 0 0 12px rgba(201,122,138,0.25)",
     },
     ghost: {
       background: "transparent",
-      border: "1px solid rgba(100,200,60,0.3)",
-      color: "#8abf60",
+      border: "1px solid rgba(201,122,138,0.3)",
+      color: "#C97A8A",
       boxShadow: "none",
     },
   };
@@ -185,9 +185,9 @@ function RetroButton({ children, href, onClick, variant = "default", size = "md"
       style={base}
       href={href}
       onClick={onClick}
-      onMouseDown={(e) => { (e.target as HTMLElement).style.transform = "translate(2px, 2px)"; }}
-      onMouseUp={(e) => { (e.target as HTMLElement).style.transform = "none"; }}
-      onMouseLeave={(e) => { (e.target as HTMLElement).style.transform = "none"; }}
+      onMouseDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "translate(2px, 2px)"; }}
+      onMouseUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "none"; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "none"; }}
     >
       {children}
     </Tag>
@@ -305,7 +305,7 @@ function HeroSection() {
       {/* Glow */}
       <div className="absolute pointer-events-none" style={{
         top: "-15%", right: "-8%", width: "50%", height: "60%",
-        background: "radial-gradient(circle, rgba(100,200,60,0.06) 0%, transparent 65%)",
+        background: "radial-gradient(circle, rgba(201,122,138,0.06) 0%, transparent 65%)",
       }} />
 
       <div className="retro-container relative">
@@ -633,7 +633,7 @@ function ContactSection() {
     <section id="contact" className="retro-section" style={{ position: "relative", overflow: "hidden" }}>
       <div className="absolute pointer-events-none" style={{
         bottom: "-20%", left: "-10%", width: "50%", height: "70%",
-        background: "radial-gradient(circle, rgba(100,200,60,0.05) 0%, transparent 65%)",
+        background: "radial-gradient(circle, rgba(201,122,138,0.05) 0%, transparent 65%)",
       }} />
       <div className="retro-container relative">
         <SectionHeader index="06" label="CONTACT" title="Get in Touch" />

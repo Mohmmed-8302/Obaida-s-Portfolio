@@ -238,7 +238,7 @@ function MonitorScene({ progress }: { progress: number }) {
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                background: "radial-gradient(ellipse, rgba(100,200,60,0.12), transparent 70%)",
+                background: "radial-gradient(ellipse, rgba(201,122,138,0.12), transparent 70%)",
                 opacity: screenGlow,
               }}
             />
