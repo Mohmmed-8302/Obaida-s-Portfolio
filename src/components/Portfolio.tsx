@@ -261,6 +261,14 @@ function PortfolioNav({ onExit }: { onExit?: () => void }) {
             ◀ EXIT
           </button>
         )}
+        {/* Brand Logo */}
+        <div style={{ flex: "0 0 auto" }}>
+          <img
+            src="/assets/Logos/logo-glow.png"
+            alt="Obaida"
+            style={{ height: "clamp(28px, 3cqi, 38px)", width: "auto", display: "block", filter: "drop-shadow(0 0 6px rgba(201,122,138,0.4))" }}
+          />
+        </div>
         <div className="retro-nav-links">
           {NAV_LINKS.map((l) => (
             <button
@@ -303,9 +311,11 @@ function HeroSection() {
       <div className="retro-container relative">
         {/* Top bar */}
         <div className="flex items-center justify-between" style={{ marginBottom: "clamp(40px, 7cqi, 80px)" }}>
-          <div style={{ fontFamily: "var(--font-pixel)", fontSize: "clamp(18px, 3cqi, 28px)", fontWeight: 700, color: "var(--retro-green)" }}>
-            OBAIDA<span style={{ color: "var(--retro-amber)" }}>.</span>
-          </div>
+          <img
+            src="/assets/Logos/logo-glow.png"
+            alt="Obaida"
+            style={{ height: "clamp(36px, 4cqi, 56px)", width: "auto", display: "block", filter: "drop-shadow(0 0 12px rgba(201,122,138,0.5))", animation: "logoGlow 3s ease infinite" }}
+          />
           <div className="retro-status-badge">
             <span className="retro-status-dot" />
             <span>AVAILABLE — 2026</span>
