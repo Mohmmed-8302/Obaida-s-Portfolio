@@ -19,18 +19,55 @@ export interface DocFile {
   deleted?: number;
 }
 
-const KEY = "xp.files";
-const SEEDED_KEY = "xp.seeded";
+/** localStorage key for persisted files */
+// const KEY = "xp.files";
+/** localStorage key for seeded state */
+// const SEEDED_KEY = "xp.seeded";
+
+/** Set of listener callbacks for store subscriptions */
 const listeners = new Set<() => void>();
+
+/** Main in-memory cache of all documents */
 let cache: DocFile[] | null = null;
-// Derived, stable snapshots so useSyncExternalStore doesn't loop on a fresh array.
+
+/** Flag to prevent reads during cloud hydration (used by hydrateFiles) */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+let hydrating = false;
+
+/** Derived, stable snapshots so useSyncExternalStore doesn't loop on a fresh array. */
 let liveCache: DocFile[] = [];
 let deletedCache: DocFile[] = [];
 
+/** Memoized snapshot references to avoid unnecessary re-renders */
+let memoLiveSnapshot: DocFile[] = [];
+let memoBinSnapshot: DocFile[] = [];
+
 function recompute(): void {
   const all = cache ?? [];
-  liveCache = all.filter((f) => !f.deleted);
-  deletedCache = all.filter((f) => f.deleted);
+  const newLive = all.filter((f) => !f.deleted);
+  const newDeleted = all.filter((f) => f.deleted);
+  
+  // Only update references if arrays actually changed
+  if (!arraysEqual(newLive, memoLiveSnapshot)) {
+    memoLiveSnapshot = newLive;
+  }
+  if (!arraysEqual(newDeleted, memoBinSnapshot)) {
+    memoBinSnapshot = newDeleted;
+  }
+  
+  liveCache = memoLiveSnapshot;
+  deletedCache = memoBinSnapshot;
+}
+
+/** Shallow comparison of DocFile arrays by id and modified timestamp */
+function arraysEqual(a: DocFile[], b: DocFile[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].id !== b[i].id || a[i].modified !== b[i].modified || a[i].deleted !== b[i].deleted) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function uid(): string {
@@ -59,10 +96,14 @@ function binSnapshot(): DocFile[] { read(); return deletedCache; }
 
 /** Replace the whole store (used by cloud hydration). */
 export function hydrateFiles(raw: string): void {
+  hydrating = true;
   try {
     const parsed = JSON.parse(raw) as DocFile[];
     write(Array.isArray(parsed) ? parsed : []);
   } catch { /* ignore */ }
+  finally {
+    hydrating = false;
+  }
 }
 
 function subscribe(cb: () => void): () => void {
@@ -86,8 +127,37 @@ export function getFile(id: string): DocFile | undefined {
   return read().find((f) => f.id === id);
 }
 
+/** Characters not allowed in file names */
+const INVALID_CHARS = /[<>:"/\\|?*]/g;
+
+/** Sanitize file name by removing invalid characters and path traversal */
+function sanitizeName(name: string): string {
+  return name
+    .replace(INVALID_CHARS, '')
+    .replace(/\.\./g, '')
+    .trim()
+    .slice(0, 255);
+}
+
 /** Upsert. Returns the (possibly new) document id. */
 export function saveFile(p: { id?: string; type: DocType; name: string; content: string }): string {
+  // Validate name
+  if (!p.name || typeof p.name !== 'string') {
+    throw new Error('File name is required');
+  }
+  const sanitized = sanitizeName(p.name);
+  if (sanitized.length === 0) {
+    throw new Error('File name cannot be empty after sanitization');
+  }
+  if (sanitized.length > 255) {
+    throw new Error('File name exceeds 255 characters');
+  }
+  
+  // Validate content
+  if (typeof p.content !== 'string') {
+    throw new Error('File content must be a string');
+  }
+  
   const list = read();
   const now = Date.now();
   if (p.id) {

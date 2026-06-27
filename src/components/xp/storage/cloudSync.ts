@@ -2,6 +2,32 @@
 
 import { getDeviceId } from "./deviceId";
 
+/** Debounce timer for cloud push */
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+const DEBOUNCE_MS = 1000;
+
+/** Exponential backoff retry helper */
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3
+): Promise<Response> {
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      return response;
+    } catch (error: unknown) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt < maxRetries - 1) {
+        const delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw lastError ?? new Error('Fetch failed after retries');
+}
+
 /** Bundles every persisted `xp.*` slice into one document and mirrors it to
  *  Vercel Blob through /api/saves, keyed by the anonymous device id.
  *
@@ -22,9 +48,7 @@ const hydrators = new Map<string, HydrateFn>();
 const statusListeners = new Set<(s: SyncStatus) => void>();
 
 let cloudEnabled = false;
-let initialized = false;
 let lastStatus: SyncStatus = "local";
-let pushTimer: ReturnType<typeof setTimeout> | null = null;
 
 /** Stores register here so cloud hydration can refresh their in-memory cache. */
 export function registerHydrator(key: string, fn: HydrateFn): void {
@@ -72,7 +96,13 @@ export async function initCloudSync(_onAfterHydrate?: () => void): Promise<void>
   emit("local");
 }
 
-export function scheduleCloudPush(): void {}
+export function scheduleCloudPush(): void {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    debounceTimer = null;
+    pushNow();
+  }, DEBOUNCE_MS);
+}
 
 async function pushNow(): Promise<void> {
   if (typeof window === "undefined" || !cloudEnabled) return;
@@ -82,16 +112,22 @@ async function pushNow(): Promise<void> {
   if (body.length > MAX_BYTES) { emit("local"); return; } // too big to mirror
   emit("syncing");
   try {
-    const res = await fetch("/api/saves", {
+    const res = await fetchWithRetry("/api/saves", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body,
     });
-    const json = await res.json().catch(() => ({}));
+    let json: { configured?: boolean } = {};
+    try {
+      json = await res.json();
+    } catch {
+      // Response not JSON, treat as offline
+    }
     if (json && json.configured === false) { cloudEnabled = false; emit("local"); return; }
     setLocalSavedAt(savedAt);
     emit("saved");
-  } catch {
+  } catch (error: unknown) {
+    console.warn('[cloudSync] Push failed:', error instanceof Error ? error.message : String(error));
     emit("offline");
   }
 }

@@ -10,13 +10,21 @@ const SCENE_H = 620;
 function useFitScale() {
   const [scale, setScale] = useState(1);
   useEffect(() => {
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     const update = () => {
       const s = Math.min(window.innerWidth / SCENE_W, window.innerHeight / SCENE_H) * 0.94;
       setScale(Math.min(s, 1.15));
     };
+    const debouncedUpdate = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(update, 250);
+    };
     update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
+    window.addEventListener("resize", debouncedUpdate);
+    return () => {
+      window.removeEventListener("resize", debouncedUpdate);
+      if (debounceTimer) clearTimeout(debounceTimer);
+    };
   }, []);
   return scale;
 }

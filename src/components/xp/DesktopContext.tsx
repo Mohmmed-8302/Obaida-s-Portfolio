@@ -51,5 +51,9 @@ export const DesktopContext = createContext<DesktopApi>({
 });
 
 export function useDesktop() {
-  return useContext(DesktopContext);
+  const ctx = useContext(DesktopContext);
+  if (!ctx) {
+    throw new Error('useDesktop must be used inside DesktopContext.Provider');
+  }
+  return ctx;
 }

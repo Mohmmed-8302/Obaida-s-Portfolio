@@ -135,7 +135,7 @@ export default function XPWindow({
         onMouseDown={onTitleDown}
         onDoubleClick={onToggleMaximize}
       >
-        <div className="flex items-center gap-1.5 overflow-hidden">
+        <div className="flex items-center gap-1.5 overflow-hidden" role="heading" aria-level={2} aria-label={win.title}>
           <span className="shrink-0 flex items-center" style={{ width: 16, height: 16 }}>{icon}</span>
           <span className="truncate" style={{
             fontSize: 12, color: "#fff", fontWeight: 700,

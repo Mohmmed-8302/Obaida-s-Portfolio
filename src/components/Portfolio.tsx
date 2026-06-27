@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
    Static data
@@ -710,7 +710,7 @@ function FooterSection() {
    Root
    ═══════════════════════════════════════════════════════════════ */
 
-export default function Portfolio({ onExit }: { onExit?: () => void } = {}) {
+function PortfolioComponent({ onExit }: { onExit?: () => void } = {}) {
   return (
     <div className="retro-root" style={{ containerType: "inline-size" }}>
       {/* CRT overlay effects */}
@@ -736,3 +736,5 @@ export default function Portfolio({ onExit }: { onExit?: () => void } = {}) {
     </div>
   );
 }
+
+export default memo(PortfolioComponent);

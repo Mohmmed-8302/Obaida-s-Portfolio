@@ -6,6 +6,9 @@
 
 const KEY = "xp.deviceId";
 
+/** Flag indicating whether localStorage-based sync is available */
+let syncEnabled = true;
+
 function uid(): string {
   try {
     if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
@@ -22,9 +25,19 @@ export function getDeviceId(): string {
     let id = window.localStorage.getItem(KEY);
     if (!id) { id = uid(); window.localStorage.setItem(KEY, id); }
     cached = id;
+    syncEnabled = true;
     return id;
   } catch {
+    syncEnabled = false;
+    console.warn('[deviceId] localStorage unavailable - cloud sync disabled, using session-only ID');
     cached = uid();
     return cached;
   }
+}
+
+/** Returns whether localStorage-based sync is available */
+export function isSyncEnabled(): boolean {
+  // Ensure getDeviceId has been called to set the flag
+  if (cached === null) getDeviceId();
+  return syncEnabled;
 }

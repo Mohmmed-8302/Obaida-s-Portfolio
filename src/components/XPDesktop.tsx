@@ -38,8 +38,8 @@ const THEMES: Record<XpTheme, Record<string, string>> = {
   },
 };
 
-const SETTINGS_KEY = "xp.settings";
-const ICON_POS_KEY = "xp.iconPositions";
+// const SETTINGS_KEY = "xp.settings";
+// const ICON_POS_KEY = "xp.iconPositions";
 const GRID_W = 82;
 const GRID_H = 90;
 const GRID_PAD_X = 8;
@@ -249,7 +249,15 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
   }, [focusWindow]);
 
   const moveWindow = useCallback((id: string, x: number, y: number) => {
-    setWindows((ws) => ws.map((w) => (w.id === id ? { ...w, rect: { ...w.rect, x, y } } : w)));
+    // Clamp position so window can't go off-screen
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+    setWindows((ws) => ws.map((w) => {
+      if (w.id !== id) return w;
+      const clampedX = Math.max(0, Math.min(x, vw - Math.min(w.rect.w, 100)));
+      const clampedY = Math.max(0, Math.min(y, vh - TASKBAR_HEIGHT - 30));
+      return { ...w, rect: { ...w.rect, x: clampedX, y: clampedY } };
+    }));
   }, []);
 
   const resizeWindow = useCallback((id: string, rect: Rect) => {
@@ -307,9 +315,11 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
   // Drag move/up handlers (attached to window during drag)
   useEffect(() => {
     if (!dragging) return;
+    let isMounted = true;
     const maxX = window.innerWidth - GRID_W;
     const maxY = window.innerHeight - TASKBAR_HEIGHT - GRID_H;
     const onMove = (e: MouseEvent) => {
+      if (!isMounted) return;
       setDragging((d) => {
         if (!d) return null;
         const x = Math.max(0, Math.min(e.clientX - d.offsetX, maxX));
@@ -318,6 +328,7 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
       });
     };
     const onUp = (e: MouseEvent) => {
+      if (!isMounted) return;
       const rawX = Math.max(0, Math.min(e.clientX - dragging.offsetX, maxX));
       const rawY = Math.max(0, Math.min(e.clientY - dragging.offsetY, maxY));
       const snapped = snapToGrid(rawX, rawY);
@@ -330,7 +341,11 @@ export default function XPDesktop({ onShutdown }: XPDesktopProps) {
     };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
+    return () => {
+      isMounted = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
   }, [dragging]);
 
   const onIconDragStart = useCallback((id: string, e: React.MouseEvent) => {
@@ -485,11 +500,8 @@ function wallpaperStyle(s: XpSettings): React.CSSProperties {
   return { ...base, backgroundImage: `url('${s.wallpaper}')`, backgroundRepeat: "no-repeat", backgroundPosition: "center", backgroundSize: "cover" };
 }
 
-function DesktopMenu({ x, y, onClose, onProperties }: { x: number; y: number; onClose: () => void; onProperties: () => void }) {
-  // Keep the menu on-screen.
-  const left = typeof window !== "undefined" ? Math.min(x, window.innerWidth - 170) : x;
-  const top = typeof window !== "undefined" ? Math.min(y, window.innerHeight - 180) : y;
-  const Item = ({ label, onClick, disabled }: { label: string; onClick?: () => void; disabled?: boolean }) => (
+function DesktopMenuItem({ label, onClick, disabled }: { label: string; onClick?: () => void; disabled?: boolean }) {
+  return (
     <button
       className="w-full text-left"
       style={{ padding: "4px 22px", border: "none", background: "transparent", fontSize: 11, color: disabled ? "#9aa0aa" : "#222", cursor: disabled ? "default" : "pointer" }}
@@ -500,20 +512,29 @@ function DesktopMenu({ x, y, onClose, onProperties }: { x: number; y: number; on
       {label}
     </button>
   );
-  const Sep = () => <div style={{ height: 1, background: "#d6d2c2", margin: "3px 2px" }} />;
+}
+
+function DesktopMenuSep() {
+  return <div style={{ height: 1, background: "#d6d2c2", margin: "3px 2px" }} />;
+}
+
+function DesktopMenu({ x, y, onClose, onProperties }: { x: number; y: number; onClose: () => void; onProperties: () => void }) {
+  // Keep the menu on-screen.
+  const left = typeof window !== "undefined" ? Math.min(x, window.innerWidth - 170) : x;
+  const top = typeof window !== "undefined" ? Math.min(y, window.innerHeight - 180) : y;
   return (
     <div
       className="absolute"
       style={{ left, top, zIndex: 150, minWidth: 160, background: "#fff", border: "1px solid #8a8a8a", boxShadow: "3px 3px 10px rgba(0,0,0,0.35)", padding: "2px 0", fontFamily: "Tahoma, sans-serif" }}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <Item label="Arrange Icons By" disabled />
-      <Item label="Refresh" onClick={onClose} />
-      <Sep />
-      <Item label="Paste" disabled />
-      <Item label="New" disabled />
-      <Sep />
-      <Item label="Properties" onClick={onProperties} />
+      <DesktopMenuItem label="Arrange Icons By" disabled />
+      <DesktopMenuItem label="Refresh" onClick={onClose} />
+      <DesktopMenuSep />
+      <DesktopMenuItem label="Paste" disabled />
+      <DesktopMenuItem label="New" disabled />
+      <DesktopMenuSep />
+      <DesktopMenuItem label="Properties" onClick={onProperties} />
     </div>
   );
 }
@@ -548,6 +569,8 @@ function DesktopIcon({ label, icon, selected, isDragging, x, y, onMouseDown, onO
   return (
     <button
       className="absolute flex flex-col items-center gap-0.5 p-1.5 rounded"
+      aria-label={label}
+      title={label}
       style={{
         width: GRID_W, height: GRID_H, left: x, top: y, zIndex: isDragging ? 100 : 1,
         background: "transparent", border: "1px dotted transparent", cursor: "default",

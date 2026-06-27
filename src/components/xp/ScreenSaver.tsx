@@ -74,15 +74,30 @@ function SaverCanvas({ type }: { type: SaverType }) {
     let raf = 0;
     let frame = 0;
 
-    const resize = () => { cv.width = window.innerWidth; cv.height = window.innerHeight; };
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    let lastW = 0, lastH = 0;
+    const resize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      // Skip if dimensions haven't changed
+      if (w === lastW && h === lastH) return;
+      lastW = w;
+      lastH = h;
+      cv.width = w;
+      cv.height = h;
+    };
+    const debouncedResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 200);
+    };
     resize();
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", debouncedResize);
 
     // ── starfield ──
     let stars = newStars(cv.width, cv.height);
 
     // ── mystify ──
-    let shapes = newShapes(cv.width, cv.height);
+    const shapes = newShapes(cv.width, cv.height);
 
     // ── bliss (DVD-style bouncing wordmark) ──
     const logo = { x: cv.width * 0.3, y: cv.height * 0.4, vx: 2.4, vy: 1.8, hue: 0 };
@@ -152,7 +167,11 @@ function SaverCanvas({ type }: { type: SaverType }) {
     };
 
     raf = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", debouncedResize);
+      if (resizeTimer) clearTimeout(resizeTimer);
+    };
   }, [type]);
 
   return <canvas ref={ref} style={{ display: "block", width: "100%", height: "100%" }} />;

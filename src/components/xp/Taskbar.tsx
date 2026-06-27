@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, type ReactNode } from "react";
+import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
 import type { WindowInstance, AppId, AppPayload, XpSettings } from "./types";
 import { XPFlag, IeIcon } from "./icons";
 import { APPS } from "./registry";
@@ -29,10 +29,27 @@ export default function Taskbar({ windows, activeId, startOpen, settings, update
   const pins = usePins();
 
   useEffect(() => {
-    const update = () => { const d = new Date(); setNow(d); setTime(d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })); };
+    const update = () => {
+      const d = new Date();
+      setNow(d);
+      setTime(d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
+    };
     update();
-    const id = setInterval(update, 15000);
-    return () => clearInterval(id);
+    // Calculate delay to sync to next minute boundary
+    const now = new Date();
+    const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+    const initialTimeout = setTimeout(() => {
+      update();
+      // Then update every 60 seconds
+      const id = setInterval(update, 60000);
+      // Store interval id for cleanup
+      (window as unknown as { __taskbarClockInterval?: ReturnType<typeof setInterval> }).__taskbarClockInterval = id;
+    }, msUntilNextMinute);
+    return () => {
+      clearTimeout(initialTimeout);
+      const intervalId = (window as unknown as { __taskbarClockInterval?: ReturnType<typeof setInterval> }).__taskbarClockInterval;
+      if (intervalId) clearInterval(intervalId);
+    };
   }, []);
 
   // Close popups on any outside click.
@@ -43,7 +60,7 @@ export default function Taskbar({ windows, activeId, startOpen, settings, update
     return () => window.removeEventListener("mousedown", close);
   }, [tray, pinMenu]);
 
-  const openPin = (p: Pin) => onOpenApp("ie", { kind: "site", url: p.url, name: p.name });
+  const openPin = useCallback((p: Pin) => onOpenApp("ie", { kind: "site", url: p.url, name: p.name }), [onOpenApp]);
 
   return (
     <>
@@ -279,9 +296,8 @@ function NetworkPopup({ onMouseDown }: { onMouseDown: (e: React.MouseEvent) => v
   );
 }
 
-function PinMenu({ x, pin, onAdd, onOpen, onRemove, onMouseDown }: { x: number; pin?: Pin; onAdd: () => void; onOpen: () => void; onRemove: () => void; onMouseDown: (e: React.MouseEvent) => void }) {
-  const left = typeof window !== "undefined" ? Math.min(x, window.innerWidth - 180) : x;
-  const Item = ({ label, onClick, danger }: { label: string; onClick: () => void; danger?: boolean }) => (
+function PinMenuItem({ label, onClick, danger }: { label: string; onClick: () => void; danger?: boolean }) {
+  return (
     <button className="w-full text-left" style={{ padding: "5px 18px", border: "none", background: "transparent", fontSize: 11, color: danger ? "#b01818" : "#222", cursor: "pointer" }}
       onClick={onClick}
       onMouseEnter={(e) => { e.currentTarget.style.background = "#316ac5"; e.currentTarget.style.color = "#fff"; }}
@@ -289,11 +305,15 @@ function PinMenu({ x, pin, onAdd, onOpen, onRemove, onMouseDown }: { x: number; 
       {label}
     </button>
   );
+}
+
+function PinMenu({ x, pin, onAdd, onOpen, onRemove, onMouseDown }: { x: number; pin?: Pin; onAdd: () => void; onOpen: () => void; onRemove: () => void; onMouseDown: (e: React.MouseEvent) => void }) {
+  const left = typeof window !== "undefined" ? Math.min(x, window.innerWidth - 180) : x;
   return (
     <div className="absolute" onMouseDown={onMouseDown} style={{ left, bottom: TASKBAR_HEIGHT + 2, zIndex: 130, minWidth: 160, background: "#fff", border: "1px solid #8a8a8a", boxShadow: "3px 3px 10px rgba(0,0,0,0.35)", padding: "2px 0", fontFamily: "Tahoma, sans-serif" }}>
-      {pin && <Item label="Open" onClick={onOpen} />}
-      {pin && pin.url !== "portfolio" && <Item label="Remove from taskbar" onClick={onRemove} danger />}
-      <Item label="Add a web link…" onClick={onAdd} />
+      {pin && <PinMenuItem label="Open" onClick={onOpen} />}
+      {pin && pin.url !== "portfolio" && <PinMenuItem label="Remove from taskbar" onClick={onRemove} danger />}
+      <PinMenuItem label="Add a web link…" onClick={onAdd} />
     </div>
   );
 }
