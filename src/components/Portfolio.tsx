@@ -19,24 +19,12 @@ const MARQUEE_ITEMS = [
 ];
 
 const YT_CHANNEL = "https://youtube.com/@festeara-24";
-const WORK = [
+const PORTFOLIOS = [
   {
-    num: "01", tag: "Gaming", title: "Viral Gaming Edits",
-    meta: "FX · Pacing · Hooks", dur: "0:47",
-    desc: "High-energy edits engineered to survive the first three seconds.",
-    url: YT_CHANNEL,
-  },
-  {
-    num: "02", tag: "Education", title: "Education That Lands",
-    meta: "Clarity · Retention · Story", dur: "1:23",
-    desc: "Complex ideas cut down to the moments people actually remember.",
-    url: YT_CHANNEL,
-  },
-  {
-    num: "03", tag: "Awareness", title: "Awareness Clips",
-    meta: "Emotion · Message · Impact", dur: "2:15",
-    desc: "Message-first storytelling with not a single wasted second.",
-    url: YT_CHANNEL,
+    num: "01", tag: "Corporate", title: "IES-BIM",
+    meta: "Web Design · Development · Branding",
+    desc: "A professional corporate website for IES-BIM — clean layout, modern structure, built to convert.",
+    url: "https://www.ies-bim.com/",
   },
 ];
 
@@ -79,7 +67,7 @@ const NAV_LINKS = [
   { label: "HOME", to: "hero" },
   { label: "STUDIO", to: "studio" },
   { label: "JOURNEY", to: "journey" },
-  { label: "WORK", to: "work" },
+  { label: "PORTFOLIOS", to: "work" },
   { label: "VIDEOS", to: "videos" },
   { label: "SKILLS", to: "skills" },
   { label: "CONTACT", to: "contact" },
@@ -429,16 +417,34 @@ function AboutSection() {
   );
 }
 
-function WorkCard({ item, delay }: { item: typeof WORK[number]; delay: number }) {
+function PortfolioCard({ item, delay }: { item: typeof PORTFOLIOS[number]; delay: number }) {
   return (
     <Reveal delay={delay}>
-      <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
-        <article className="retro-card">
-          <div className="retro-card-media">
-            <span className="retro-card-ghost-num">{item.num}</span>
-            <span className="retro-card-play">▶</span>
-            <div className="retro-card-dur">{item.dur}</div>
+      <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+        <article className="retro-card" style={{ maxWidth: 560 }}>
+          <div className="retro-card-media" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div className="retro-card-tag">[{item.tag}]</div>
+            <span className="retro-card-ghost-num">{item.num}</span>
+            <div style={{
+              position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", gap: 10, zIndex: 1,
+            }}>
+              <span style={{
+                width: 48, height: 48, borderRadius: "50%",
+                border: "2px solid rgba(201,122,138,0.5)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: "rgba(201,122,138,0.08)",
+                fontSize: 20, color: "var(--retro-green)",
+              }}>
+                ↗
+              </span>
+              <span style={{
+                fontFamily: "var(--font-pixel)", fontSize: 10,
+                color: "var(--retro-dim)", letterSpacing: "0.12em",
+              }}>
+                VISIT SITE
+              </span>
+            </div>
           </div>
           <div className="retro-card-body">
             <div className="flex items-start justify-between" style={{ gap: 10, marginBottom: 8 }}>
@@ -458,9 +464,9 @@ function WorkSection() {
   return (
     <section id="work" className="retro-section">
       <div className="retro-container">
-        <SectionHeader index="03" label="SELECTED WORK" title="Projects & Portfolio" />
+        <SectionHeader index="03" label="PORTFOLIOS" title="Portfolios" />
         <div className="retro-work-grid">
-          {WORK.map((item, i) => <WorkCard key={item.num} item={item} delay={i * 120} />)}
+          {PORTFOLIOS.map((item, i) => <PortfolioCard key={item.num} item={item} delay={i * 120} />)}
         </div>
       </div>
     </section>
