@@ -331,11 +331,11 @@ body {
 }
 
 .retro-root .retro-eyebrow {
-  font-family: var(--font-pixel);
+  font-family: var(--font-mono), monospace;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: clamp(10px, 1.1cqi, 13px);
+  letter-spacing: 0.14em;
+  font-size: clamp(11px, 1.2cqi, 14px);
   color: var(--retro-green);
 }
 
@@ -604,6 +604,9 @@ body {
   border-color: var(--retro-green);
   box-shadow: 0 0 16px rgba(201, 122, 138, 0.1), inset 0 0 30px rgba(201, 122, 138, 0.03);
   transform: translateY(-4px);
+}
+.retro-card:hover .retro-card-hover-overlay {
+  opacity: 1 !important;
 }
 
 .retro-card-media {

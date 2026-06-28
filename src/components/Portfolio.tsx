@@ -25,6 +25,7 @@ const PORTFOLIOS = [
     meta: "Web Design · Development · Branding",
     desc: "A professional corporate website for IES-BIM — clean layout, modern structure, built to convert.",
     url: "https://www.ies-bim.com/",
+    screenshot: "/screenshots/ies-bim.jpg",
   },
 ];
 
@@ -172,6 +173,7 @@ function RetroButton({ children, href, onClick, variant = "default", size = "md"
     <Tag
       style={base}
       href={href}
+      {...(!href ? { type: "button" as const } : {})}
       onClick={onClick}
       onMouseDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "translate(2px, 2px)"; }}
       onMouseUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "none"; }}
@@ -245,7 +247,7 @@ function PortfolioNav({ onExit }: { onExit?: () => void }) {
       <div className="retro-nav-inner">
         {/* Exit button */}
         {onExit && (
-          <button onClick={onExit} className="retro-nav-exit" title="Back to monitor">
+          <button type="button" onClick={onExit} className="retro-nav-exit" title="Back to monitor">
             ◀ EXIT
           </button>
         )}
@@ -260,6 +262,7 @@ function PortfolioNav({ onExit }: { onExit?: () => void }) {
         <div className="retro-nav-links">
           {NAV_LINKS.map((l) => (
             <button
+              type="button"
               key={l.to}
               onClick={() => go(l.to)}
               className="retro-nav-btn"
@@ -422,25 +425,31 @@ function PortfolioCard({ item, delay }: { item: typeof PORTFOLIOS[number]; delay
     <Reveal delay={delay}>
       <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
         <article className="retro-card" style={{ maxWidth: 560 }}>
-          <div className="retro-card-media" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="retro-card-media" style={{ position: "relative" }}>
             <div className="retro-card-tag">[{item.tag}]</div>
-            <span className="retro-card-ghost-num">{item.num}</span>
+            <img
+              src={item.screenshot}
+              alt={`${item.title} website preview`}
+              style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }}
+            />
             <div style={{
               position: "absolute", inset: 0, display: "flex", flexDirection: "column",
               alignItems: "center", justifyContent: "center", gap: 10, zIndex: 1,
-            }}>
+              background: "rgba(0,0,0,0.35)",
+              opacity: 0, transition: "opacity 0.3s ease",
+            }} className="retro-card-hover-overlay">
               <span style={{
                 width: 48, height: 48, borderRadius: "50%",
-                border: "2px solid rgba(201,122,138,0.5)",
+                border: "2px solid rgba(201,122,138,0.6)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                background: "rgba(201,122,138,0.08)",
+                background: "rgba(0,0,0,0.5)",
                 fontSize: 20, color: "var(--retro-green)",
               }}>
                 ↗
               </span>
               <span style={{
                 fontFamily: "var(--font-pixel)", fontSize: 10,
-                color: "var(--retro-dim)", letterSpacing: "0.12em",
+                color: "#e0e0e0", letterSpacing: "0.12em",
               }}>
                 VISIT SITE
               </span>
@@ -499,31 +508,32 @@ function VideoCard({ video, delay }: { video: typeof VIDEOS[number]; delay: numb
   }, []);
 
   const seekThumb = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
-    e.currentTarget.currentTime = 0.5;
+    e.currentTarget.currentTime = 1;
   }, []);
 
   return (
     <Reveal delay={delay}>
-      <div className="retro-video-card">
-        <div style={{ position: "relative", cursor: "pointer" }} onClick={toggle}>
+      <div className="retro-video-card" style={{ cursor: "pointer" }}>
+        <div style={{ position: "relative" }} onClick={toggle}>
           <video
             ref={vidRef}
             src={video.src}
-            loop muted playsInline preload="metadata"
-            onLoadedMetadata={seekThumb}
+            loop muted playsInline preload="auto"
+            onLoadedData={seekThumb}
             onEnded={() => setPlaying(false)}
             style={{ width: "100%", display: "block", aspectRatio: "9/16", objectFit: "cover", background: "#000" }}
           />
-          {!playing ? (
+          {!playing && (
             <div className="retro-video-overlay">
               <div className="retro-video-play-btn">▶</div>
             </div>
-          ) : (
+          )}
+          {playing && (
             <div style={{ position: "absolute", bottom: 8, right: 8, display: "flex", gap: 6 }}>
-              <button onClick={toggleMute} className="retro-video-ctrl">
+              <button type="button" onClick={toggleMute} className="retro-video-ctrl">
                 {muted ? "♪×" : "♪"}
               </button>
-              <button onClick={goFullscreen} className="retro-video-ctrl">
+              <button type="button" onClick={goFullscreen} className="retro-video-ctrl">
                 ⛶
               </button>
             </div>

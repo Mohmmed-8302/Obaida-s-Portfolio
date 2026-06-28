@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Portfolio from "@/components/Portfolio";
 
-const ZOOM_HEIGHT = 2.5;
+const ZOOM_HEIGHT = 1.8;
 
 export default function Home() {
   const zoomRef = useRef<HTMLDivElement>(null);
@@ -77,9 +77,9 @@ export default function Home() {
             className="absolute bottom-8 left-1/2 flex flex-col items-center"
             style={{
               transform: "translateX(-50%)",
-              opacity: Math.max(0, 1 - progress * 5),
+              opacity: Math.max(0, 1 - progress * 3),
               transition: "opacity 0.2s",
-              pointerEvents: progress > 0.1 ? "none" : "auto",
+              pointerEvents: progress > 0.15 ? "none" : "auto",
             }}
           >
             <span

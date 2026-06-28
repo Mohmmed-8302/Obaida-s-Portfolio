@@ -159,6 +159,7 @@ export default function CRTMonitor({ onPower, powered, children }: CRTMonitorPro
           </div>
           {/* power button */}
           <button
+            type="button"
             onClick={!powered ? onPower : undefined}
             className="absolute"
             style={{
